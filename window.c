@@ -167,7 +167,7 @@ gl4duPushMatrix(); {
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
-        gl4duTranslatef(0.0f, 0.0f, -16.9f);
+        gl4duTranslatef(0.0f, 0.0f, -17.5f);
         gl4duScalef(1.4f, 1.4f, 1.4f);
         gl4duSendMatrices();
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
@@ -178,7 +178,7 @@ gl4duPushMatrix(); {
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
-        gl4duTranslatef(0.0f, 0.0f, -18.4f);
+        gl4duTranslatef(0.0f, 0.0f, -19.5f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
         gl4duSendMatrices();
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
@@ -204,7 +204,7 @@ gl4duPushMatrix(); {
   /*   gl4dfBlur(0, 0, 5, 1, 0, GL_FALSE); */
   /*   gl4dfSobelSetMixMode(GL4DF_SOBEL_MIX_MULT); */
   /*   gl4dfSobel(0, 0, GL_FALSE); */
-  a++;
+  a = a + 0.1f;
 
   
 }
