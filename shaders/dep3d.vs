@@ -1,21 +1,17 @@
-/*!\file dep3d.vs
- *
- * \brief Transformations matricielles standards pour les sommets, les
- * normales et les coordonnées de texture
- * \author Farès BELHADJ, amsi@ai.univ-paris8.fr 
- * \date April 15 2016
- */
 #version 330
 
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-layout (location = 0) in vec3 vsiPosition;
-layout (location = 1) in vec3 vsiNormal;
-layout (location = 2) in vec2 vsiTexCoord; /* ne sont pas utilisées dans cet exemple */
- 
-out vec3 vsoNormal;
+layout(location = 0) in vec3 pos;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 texCoord;
 
-void main(void) {
-  vsoNormal = (transpose(inverse(modelViewMatrix))  * vec4(vsiNormal, 0.0)).xyz;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(vsiPosition, 1.0);
+out vec4 mpos;
+out vec3 mnormal;
+out vec2 tcoord;
+uniform mat4 proj, model, view;
+
+void main() {
+  mpos = model * vec4(pos, 1.0);
+  mnormal = normalize(transpose(inverse(model)) * vec4(normal, 0.0)).xyz;
+  gl_Position = proj * view * mpos;
+  tcoord = vec2(2.0 * texCoord.x, 2.0 * (1.0 - texCoord.y));
 }
