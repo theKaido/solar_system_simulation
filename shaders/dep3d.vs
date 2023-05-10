@@ -1,17 +1,14 @@
 #version 330
 
-layout(location = 0) in vec3 pos;
-layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 texCoord;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+layout (location = 0) in vec3 vsiPosition;
+layout (location = 1) in vec3 vsiNormal;
+layout (location = 2) in vec2 vsiTexCoord; /* ne sont pas utilisées dans cet exemple */
+ 
+out vec3 vsoNormal;
 
-out vec4 mpos;
-out vec3 mnormal;
-out vec2 tcoord;
-uniform mat4 proj, model, view;
-
-void main() {
-  mpos = model * vec4(pos, 1.0);
-  mnormal = normalize(transpose(inverse(model)) * vec4(normal, 0.0)).xyz;
-  gl_Position = proj * view * mpos;
-  tcoord = vec2(2.0 * texCoord.x, 2.0 * (1.0 - texCoord.y));
+void main(void) {
+  vsoNormal = (transpose(inverse(modelViewMatrix))  * vec4(vsiNormal, 0.0)).xyz;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(vsiPosition, 1.0);
 }
