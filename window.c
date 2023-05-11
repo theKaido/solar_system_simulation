@@ -64,7 +64,7 @@ static void init(void) {
 
   //texture soleil 
   glBindTexture(GL_TEXTURE_2D, textID[0]);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -243,44 +243,54 @@ gl4duPushMatrix(); {
      glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, rouge);
      glActiveTexture(GL_TEXTURE0);
      glBindTexture(GL_TEXTURE_2D, textID[0]);
-       glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-  glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+     glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+     //glUniform1i(glGetUniformLocation(_pId, "fragColor"), 1);
     gl4dgDraw(soleil);
    } gl4duPopMatrix();
    
     
     // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
-    gl4duRotatef(a * vit_mercure * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
+   gl4duRotatef(
+       a * vit_mercure * 2.0f, 0.0f, 1.0f,
+       0.0f); // rotation en fonction du temps et de la vitesse orbitale
+   gl4duSendMatrices();
+
+   // Planète Mercure
+   gl4duPushMatrix();
+   {
+    gl4duTranslatef(0.0f, 0.0f, -5.0f);
+    gl4duScalef(0.4f, 0.4f, 0.4f);
     gl4duSendMatrices();
-    
-    // Planète Mercure
-    gl4duPushMatrix(); {
-        gl4duTranslatef(0.0f, 0.0f, -5.0f);
-        gl4duScalef(0.4f, 0.4f, 0.4f);
-        gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, vert); // couleur rouge
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textID[1]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
-        gl4dgDraw(mercure);
-    } gl4duPopMatrix();
-    
-    // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
-    gl4duRotatef(a * vit_venus * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
+    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,
+                 vert); // couleur rouge
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textID[1]);
+    glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
+    glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+    gl4dgDraw(mercure);
+   }
+   gl4duPopMatrix();
+
+   // Faire tourner toutes les planètes autour de l'axe central à une vitesse
+   // différente
+   gl4duRotatef(
+       a * vit_venus * 2.0f, 0.0f, 1.0f,
+       0.0f); // rotation en fonction du temps et de la vitesse orbitale
+   gl4duSendMatrices();
+
+   // Planète Vénus
+   gl4duPushMatrix();
+   {
+    gl4duTranslatef(0.0f, 0.0f, -6.5f);
+    gl4duScalef(0.7f, 0.7f, 0.7f);
     gl4duSendMatrices();
-    
-    // Planète Vénus
-    gl4duPushMatrix(); {
-        gl4duTranslatef(0.0f, 0.0f, -6.5f);
-        gl4duScalef(0.7f, 0.7f, 0.7f);
-        gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, vert); // couleur jaune
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textID[2]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1); 
-        gl4dgDraw(venus);
+    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,
+                 vert); // couleur jaune
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textID[2]);
+    glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
+    glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+    gl4dgDraw(venus);
     } gl4duPopMatrix();
     
     // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
