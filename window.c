@@ -261,12 +261,11 @@ gl4duPushMatrix(); {
     gl4duTranslatef(0.0f, 0.0f, -5.0f);
     gl4duScalef(0.4f, 0.4f, 0.4f);
     gl4duSendMatrices();
-    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,
-                 vert); // couleur rouge
+    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,vert); // couleur rouge
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textID[1]);
-    glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-    glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+    glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+    //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
     gl4dgDraw(mercure);
    }
    gl4duPopMatrix();
@@ -284,12 +283,11 @@ gl4duPushMatrix(); {
     gl4duTranslatef(0.0f, 0.0f, -6.5f);
     gl4duScalef(0.7f, 0.7f, 0.7f);
     gl4duSendMatrices();
-    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,
-                 vert); // couleur jaune
+    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,vert); // couleur jaune
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textID[2]);
-    glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-    glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+    glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+    //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
     gl4dgDraw(venus);
     } gl4duPopMatrix();
     
@@ -305,8 +303,8 @@ gl4duPushMatrix(); {
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[3]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(terre);
     } gl4duPopMatrix();
     
@@ -322,8 +320,8 @@ gl4duPushMatrix(); {
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur orange
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[4]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(mars);
     } gl4duPopMatrix();
 
@@ -338,8 +336,8 @@ gl4duPushMatrix(); {
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[5]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(jupiter);
     } gl4duPopMatrix();
 
@@ -353,8 +351,8 @@ gl4duPushMatrix(); {
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[6]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(saturne);
     } gl4duPopMatrix();
 
@@ -368,8 +366,8 @@ gl4duPushMatrix(); {
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[7]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(uranus);
     } gl4duPopMatrix();
 
@@ -383,8 +381,8 @@ gl4duPushMatrix(); {
         glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[8]);
-        glUniform1i(glGetUniformLocation(_pId, "use_tex"), 1);
-        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(neptune);
     } gl4duPopMatrix();
 
