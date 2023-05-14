@@ -9,6 +9,7 @@
 #include <SDL_image.h>
 /* Prototypes des fonctions statiques contenues dans ce fichier C */
 static void init(void);
+static void loadTexture(GLuint id, const char * filename);
 static void resize(int w, int h);
 static void draw(void);
 static void quit(void);
@@ -20,7 +21,7 @@ static GLuint _pId = 0;
 static GLuint soleil = 0, anneau = 0;
 static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0;
 
-static GLuint textID[9] = {0};
+static GLuint textID[10] = {0};
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
@@ -38,258 +39,153 @@ int main(int argc, char ** argv) {
 }
 /*!\brief initialise les paramètres OpenGL et les données */
 static void init(void) {
-  SDL_Surface * s = NULL;
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
-  SDL_GL_SetSwapInterval(1);
-  _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
-  gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
-  gl4duGenMatrix(GL_FLOAT, "projectionMatrix");
-  resize(_wW, _wH);
-  soleil = gl4dgGenSpheref(100, 100);
-  mercure = gl4dgGenSpheref(10, 10);
-  venus = gl4dgGenSpheref(10, 10);
-  terre = gl4dgGenSpheref(10, 10);
-  mars = gl4dgGenSpheref(10, 10);
-  jupiter = gl4dgGenSpheref(10, 10);
-  saturne = gl4dgGenSpheref(10, 10);
-  uranus= gl4dgGenSpheref(10, 10);
-  neptune = gl4dgGenSpheref(10, 10);
-  
-  anneau = gl4dgGenTorusf(300, 30, 0.1f);
 
-  glGenTextures(sizeof textID / sizeof * textID, textID);
-  assert(textID[0] && textID[1] && textID[2] && textID[3] &&textID[4] && textID[5] && textID[6] && textID[7] && textID[8]);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
+    
+    _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
+    gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
+    gl4duGenMatrix(GL_FLOAT, "projectionMatrix");
+    resize(_wW, _wH);
+    soleil = gl4dgGenSpheref(30, 30);
+    mercure = gl4dgGenSpheref(30, 30);
+    venus = gl4dgGenSpheref(30, 30);
+    terre = gl4dgGenSpheref(30, 30);
+    mars = gl4dgGenSpheref(30, 30);
+    jupiter = gl4dgGenSpheref(30, 30);
+    saturne = gl4dgGenSpheref(30, 30);
+    uranus= gl4dgGenSpheref(30, 30);
+    neptune = gl4dgGenSpheref(30, 30);
+    anneau = gl4dgGenTorusf(300, 30, 0.1f);
 
-  //texture soleil 
-  glBindTexture(GL_TEXTURE_2D, textID[0]);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+    glGenTextures(sizeof textID / sizeof * textID, textID);
+    assert(textID[0] && textID[1] && textID[2] && textID[3] &&textID[4] && textID[5] && textID[6] && textID[7] && textID[8]);
+
+    loadTexture(textID[0], "images/soleil.jpg");
+    loadTexture(textID[1], "images/mercure.jpg");
+    loadTexture(textID[2], "images/venus.jpg");
+    loadTexture(textID[3], "images/terre.jpg");
+    loadTexture(textID[4], "images/mars.jpg");
+    loadTexture(textID[5], "images/jupiter.jpg");
+    loadTexture(textID[6], "images/saturne.jpg");
+    loadTexture(textID[7], "images/uranus.jpg");
+    loadTexture(textID[8], "images/neptune.jpg");
+    
+    glBindTexture(GL_TEXTURE_2D, textID[9]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glEnable(GL_TEXTURE_2D);
+
+
+}
+
+static void loadTexture(GLuint id, const char * filename) {
+  SDL_Surface * t;
+  glBindTexture(GL_TEXTURE_2D, id);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  s = IMG_Load("images/Soleil.png");
-  if(s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-  } else { /* si échec de chargement */
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
-  }
-
-  //texture mercure
-  glBindTexture(GL_TEXTURE_2D, textID[1]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  s = IMG_Load("images/Mercure.png");
-  if(s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-  } else { /* si échec de chargement */
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
+  if( (t = IMG_Load(filename)) != NULL ) {
+#ifdef __APPLE__
+    int mode = t->format->BytesPerPixel == 4 ? GL_BGRA : GL_BGR;
+#else
+    int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
+#endif       
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t->w, t->h, 0, mode, GL_UNSIGNED_BYTE, t->pixels);
+    SDL_FreeSurface(t);
+  } else {
+    fprintf(stderr, "can't open file %s : %s\n", filename, SDL_GetError());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   }
-
-  // Textures pour Vénus
-glBindTexture(GL_TEXTURE_2D, textID[2]);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-s = IMG_Load("images/Venus.png");
-if (s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-} else {
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
 }
 
-// Textures pour la Terre
-glBindTexture(GL_TEXTURE_2D, textID[3]);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-s = IMG_Load("images/Terre.png");
-if (s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-} else {
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
-}
-
-// Textures pour Mars
-glBindTexture(GL_TEXTURE_2D, textID[4]);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-s = IMG_Load("images/Mars.png");
-if (s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-} else {
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
-}
-
-// Textures pour Jupiter
-glBindTexture(GL_TEXTURE_2D, textID[5]);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-s = IMG_Load("images/Jupiter.png");
-if (s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-} else {
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
-}
-
-// Textures pour Saturne
-glBindTexture(GL_TEXTURE_2D, textID[6]);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-s = IMG_Load("images/Saturn.png");
-if (s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-} else {
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
-}
-
-// Textures pour Uranus
-glBindTexture(GL_TEXTURE_2D, textID[7]);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-s = IMG_Load("images/Uranus.png");
-if (s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-} else {
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
-}
-
-// Textures pour Neptune
-glBindTexture(GL_TEXTURE_2D, textID[8]);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-s = IMG_Load("images/Neptune.png");
-if (s != NULL) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
-    SDL_FreeSurface(s);
-} else {
-    GLuint p = {(0xFF << 24) | 0xFF};
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &p);
-}
-
-
-}
 /*!\brief Cette fonction paramétre la vue (viewport) OpenGL en
  * fonction des dimensions de la fenêtre.*/
+
 static void resize(int w, int h) {
   _wW  = w; _wH = h;
   glViewport(0, 0, _wW, _wH);
   gl4duBindMatrix("projectionMatrix");
   gl4duLoadIdentityf();
   gl4duFrustumf(-0.5, 0.5, -0.5 * _wH / _wW, 0.5 * _wH / _wW, 1.0, 1000.0);
-  //gl4duOrthof(-3.5, 3.5, -3.5 * _wH / _wW, 3.5 * _wH / _wW, 1.0, 1000.0);
+  //gl4duOrthof(-3.5, 3.5, -3.5 * _wH / _wW, 3.5 * _wH / _wW, 1.0, 30.0);
   gl4duBindMatrix("modelViewMatrix");
 }
 /*!\brief dessine dans le contexte OpenGL actif. */
 static void draw(void) {
 
-static GLfloat a = 0;
-GLfloat rouge[] = {1, 0, 0, 1}, vert[] = {0, 1, 0, 1}, bleu[] = {0, 0, 1, 1};
-glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-gl4duBindMatrix("modelViewMatrix");
-gl4duLoadIdentityf();
-glUseProgram(_pId);
-float vit_mercure = 0.04f; // vitesse orbitale de Mercure
-float vit_venus = 0.02f; // vitesse orbitale de Vénus 
-float vit_terre = 0.01f; // vitesse orbitale de la Terre 
-float vit_mars = 0.008f; // vitesse orbitale de Mars 
-float vit_jupiter = 0.005f;
-float vit_saturne = 0.003f;
-float vit_uranus = 0.002f;
-float vit_neptune = 0.0015f;
+    static GLfloat a = 0;
+    GLfloat rouge[] = {1, 0, 0, 1}, vert[] = {0, 1, 0, 1}, bleu[] = {0, 0, 1, 1};
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    gl4duBindMatrix("modelViewMatrix");
+    gl4duLoadIdentityf();
+    glUseProgram(_pId);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
 
 
 
-   
-gl4duPushMatrix(); {
+    float vit_mercure = 0.04f; // vitesse orbitale de Mercure
+    float vit_venus = 0.02f; // vitesse orbitale de Vénus 
+    float vit_terre = 0.01f; // vitesse orbitale de la Terre 
+    float vit_mars = 0.008f; // vitesse orbitale de Mars 
+    float vit_jupiter = 0.005f;
+    float vit_saturne = 0.003f;
+    float vit_uranus = 0.002f;
+    float vit_neptune = 0.0015f;
+
+
   
     gl4duTranslatef(0.0f, 0.0f, -40.0f); // déplacer toutes les planètes sur l'axe central
     
     gl4duPushMatrix(); {
+
      gl4duTranslatef(0, 0, 0);
-     gl4duRotatef(a * 2.0f, 1, 0, 0);
+     gl4duRotatef(a, 0, 1, 0);
      gl4duScalef(3.5f, 3.5f, 3.5f);
      gl4duSendMatrices();
-     glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, rouge);
-     glActiveTexture(GL_TEXTURE0);
-     glBindTexture(GL_TEXTURE_2D, textID[0]);
-     glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-     //glUniform1i(glGetUniformLocation(_pId, "fragColor"), 1);
+    
+    } gl4duPopMatrix();
+    
+    glBindTexture(GL_TEXTURE_2D, textID[0]);
     gl4dgDraw(soleil);
-   } gl4duPopMatrix();
    
     
     // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
-   gl4duRotatef(
-       a * vit_mercure * 2.0f, 0.0f, 1.0f,
-       0.0f); // rotation en fonction du temps et de la vitesse orbitale
-   gl4duSendMatrices();
-
-   // Planète Mercure
-   gl4duPushMatrix();
-   {
-    gl4duTranslatef(0.0f, 0.0f, -5.0f);
-    gl4duScalef(0.4f, 0.4f, 0.4f);
+    gl4duRotatef(
+        a * vit_mercure * 2.0f, 0.0f, 1.0f,
+        0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
-    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,vert); // couleur rouge
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textID[1]);
-    glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-    //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
-    gl4dgDraw(mercure);
-   }
-   gl4duPopMatrix();
+
+    // Planète Mercure
+    gl4duPushMatrix();{
+
+        gl4duTranslatef(0.0f, 0.0f, -5.0f);
+        gl4duScalef(0.4f, 0.4f, 0.4f);
+        gl4duSendMatrices();
+        glBindTexture(GL_TEXTURE_2D, textID[1]);
+        gl4dgDraw(mercure);
+
+    }gl4duPopMatrix();
 
    // Faire tourner toutes les planètes autour de l'axe central à une vitesse
    // différente
-   gl4duRotatef(
-       a * vit_venus * 2.0f, 0.0f, 1.0f,
-       0.0f); // rotation en fonction du temps et de la vitesse orbitale
-   gl4duSendMatrices();
+    gl4duRotatef(
+        a * vit_venus * 2.0f, 0.0f, 1.0f,
+        0.0f); // rotation en fonction du temps et de la vitesse orbitale
+    gl4duSendMatrices();
 
-   // Planète Vénus
-   gl4duPushMatrix();
-   {
+    // Planète Vénus
+    gl4duPushMatrix();{
+
     gl4duTranslatef(0.0f, 0.0f, -6.5f);
     gl4duScalef(0.7f, 0.7f, 0.7f);
     gl4duSendMatrices();
-    glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1,vert); // couleur jaune
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textID[2]);
-    glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-    //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
     gl4dgDraw(venus);
-    } gl4duPopMatrix();
+
+    }gl4duPopMatrix();
     
     // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
     gl4duRotatef(a * vit_terre * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
@@ -297,15 +193,13 @@ gl4duPushMatrix(); {
     
     // Planète Terre
     gl4duPushMatrix(); {
+
         gl4duTranslatef(0.0f, 0.0f, -8.5f);
         gl4duScalef(0.7f, 0.7f, 0.7f);
         gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
-        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[3]);
-        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(terre);
+
     } gl4duPopMatrix();
     
     // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
@@ -314,79 +208,73 @@ gl4duPushMatrix(); {
     
     // Planète Mars
     gl4duPushMatrix(); {
+
         gl4duTranslatef(0.0f, 0.0f, -10.7f);
         gl4duScalef(0.5f, 0.5f, 0.5f);
         gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur orange
-        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[4]);
-        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(mars);
+
     } gl4duPopMatrix();
 
-
+    //Planete Jupiter
     gl4duRotatef(a * vit_jupiter * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
+
         gl4duTranslatef(0.0f, 0.0f, -13.9f);
         gl4duScalef(1.7f, 1.7f, 1.7f);
         gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
-        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[5]);
-        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(jupiter);
+
     } gl4duPopMatrix();
 
     gl4duRotatef(a * vit_saturne * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
+
         gl4duTranslatef(0.0f, 0.0f, -17.5f);
         gl4duScalef(1.4f, 1.4f, 1.4f);
         gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[6]);
-        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(saturne);
+        gl4dgDraw(anneau);
+
     } gl4duPopMatrix();
 
     gl4duRotatef(a * vit_uranus * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
+
         gl4duTranslatef(0.0f, 0.0f, -20.5f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
         gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[7]);
-        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(uranus);
+
     } gl4duPopMatrix();
 
     gl4duRotatef(a * vit_neptune * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
+
         gl4duTranslatef(0.0f, 0.0f, -23.4f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
         gl4duSendMatrices();
-        glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, bleu); // couleur bleue
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[8]);
-        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-        //glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(neptune);
+
     } gl4duPopMatrix();
 
-} gl4duPopMatrix();
+
 
   
   
