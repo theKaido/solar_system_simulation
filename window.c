@@ -13,13 +13,14 @@ static void loadTexture(GLuint id, const char * filename);
 static void resize(int w, int h);
 static void draw(void);
 static void quit(void);
+
 /*!\brief dimensions de la fenêtre */
 static int _wW = 1000, _wH = 1000;
 /*!\brief identifiant du programme GLSL */
 static GLuint _pId = 0;
 /*!\brief quelques objets géométriques */
 static GLuint soleil = 0, anneau = 0;
-static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0;
+static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0,etoile = 0;
 
 static GLuint textID[10] = {0};
 
@@ -27,9 +28,7 @@ static GLuint textID[10] = {0};
  * initialise GL et les données, affecte les fonctions d'événements et
  * lance la boucle principale d'affichage.*/
 int main(int argc, char ** argv) {
-  if(!gl4duwCreateWindow(argc, argv, "GL4Dummies", 0, 0, 
-			 _wW, _wH, GL4DW_RESIZABLE | GL4DW_SHOWN))
-    return 1;
+  if(!gl4duwCreateWindow(argc, argv, "GL4Dummies", 0, 0, _wW, _wH, GL4DW_RESIZABLE | GL4DW_SHOWN))return 1;
   init();
   atexit(quit);
   gl4duwResizeFunc(resize);
@@ -42,7 +41,7 @@ static void init(void) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     
     _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
     gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
@@ -57,6 +56,7 @@ static void init(void) {
     saturne = gl4dgGenSpheref(30, 30);
     uranus= gl4dgGenSpheref(30, 30);
     neptune = gl4dgGenSpheref(30, 30);
+    etoile = gl4dgGenSpheref(1,1);
     anneau = gl4dgGenTorusf(300, 30, 0.1f);
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
@@ -116,7 +116,7 @@ static void resize(int w, int h) {
 static void draw(void) {
 
     static GLfloat a = 0;
-    GLfloat rouge[] = {1, 0, 0, 1}, vert[] = {0, 1, 0, 1}, bleu[] = {0, 0, 1, 1};
+    GLfloat blanc[] = {1, 1, 1, 1};
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl4duBindMatrix("modelViewMatrix");
     gl4duLoadIdentityf();
@@ -135,14 +135,25 @@ static void draw(void) {
     float vit_uranus = 0.002f;
     float vit_neptune = 0.0015f;
 
+    float inclinaison_mercure = 7.005f;
+    float inclinaison_venus = 3.39471f;
+    float inclinaison_terre = 23.43929f;
+    float inclinaison_mars = 25.19f;
+    float inclinaison_jupiter = 3.13f;
+    float inclinaison_saturne = 26.73f;
+    float inclinaison_uranus = 97.86f;
+    float inclinaison_neptune = 28.32f;
+   
+
 
   
     gl4duTranslatef(0.0f, 0.0f, -40.0f); // déplacer toutes les planètes sur l'axe central
+
     
     gl4duPushMatrix(); {
 
      gl4duTranslatef(0, 0, 0);
-     gl4duRotatef(a, 0, 1, 0);
+     gl4duRotatef(a, 0, 2, 0);
      gl4duScalef(3.5f, 3.5f, 3.5f);
      gl4duSendMatrices();
     
@@ -162,6 +173,8 @@ static void draw(void) {
     gl4duPushMatrix();{
 
         gl4duTranslatef(0.0f, 0.0f, -5.0f);
+        gl4duRotatef(inclinaison_mercure,1.0f,0.0f,0.0f);
+        gl4duRotatef(a,0.0f,0.58f,0.0f);
         gl4duScalef(0.4f, 0.4f, 0.4f);
         gl4duSendMatrices();
         glBindTexture(GL_TEXTURE_2D, textID[1]);
@@ -180,6 +193,8 @@ static void draw(void) {
     gl4duPushMatrix();{
 
     gl4duTranslatef(0.0f, 0.0f, -6.5f);
+    gl4duRotatef(inclinaison_venus,1.0f,0.0f,0.0f);
+    gl4duRotatef(a,0.0f,0.243f,0.0f);
     gl4duScalef(0.7f, 0.7f, 0.7f);
     gl4duSendMatrices();
     glBindTexture(GL_TEXTURE_2D, textID[2]);
@@ -195,6 +210,8 @@ static void draw(void) {
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -8.5f);
+        gl4duRotatef(inclinaison_terre,1.0f,0.0f,0.0f);
+        gl4duRotatef(a,0.0f,1.0f,0.0f);
         gl4duScalef(0.7f, 0.7f, 0.7f);
         gl4duSendMatrices();
         glBindTexture(GL_TEXTURE_2D, textID[3]);
@@ -210,6 +227,8 @@ static void draw(void) {
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -10.7f);
+        gl4duRotatef(inclinaison_mars,1.0f,0.0f,0.0f);
+        gl4duRotatef(a,0.0f,1.025f,0.0f);
         gl4duScalef(0.5f, 0.5f, 0.5f);
         gl4duSendMatrices();
         glBindTexture(GL_TEXTURE_2D, textID[4]);
@@ -224,6 +243,8 @@ static void draw(void) {
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -13.9f);
+        gl4duRotatef(inclinaison_jupiter,1.0f,0.0f,0.0f);
+        gl4duRotatef(a,0.0f,4.125f,0.0f);
         gl4duScalef(1.7f, 1.7f, 1.7f);
         gl4duSendMatrices();
         glBindTexture(GL_TEXTURE_2D, textID[5]);
@@ -237,11 +258,19 @@ static void draw(void) {
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -17.5f);
+        gl4duRotatef(inclinaison_saturne,1.0f,0.0f,0.0f);
+        gl4duRotatef(a,0.0f,4.458f,0.0f);
         gl4duScalef(1.4f, 1.4f, 1.4f);
         gl4duSendMatrices();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[6]);
         gl4dgDraw(saturne);
+        
+        gl4duPushMatrix(); {
+          gl4duTranslatef(0.0f, 0.0f, -5.0f);
+          gl4duScalef(1.4f, 1.4f, 1.4f);
+        } gl4duPopMatrix();
+          glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, blanc);
         gl4dgDraw(anneau);
 
     } gl4duPopMatrix();
@@ -252,6 +281,8 @@ static void draw(void) {
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -20.5f);
+        gl4duRotatef(inclinaison_uranus,1.0f,0.0f,0.0f);
+        gl4duRotatef(a,0.0f,7.167f,0.0f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
         gl4duSendMatrices();
         glActiveTexture(GL_TEXTURE0);
@@ -266,6 +297,8 @@ static void draw(void) {
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -23.4f);
+        gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
+        gl4duRotatef(a,0.0f,6.708f,0.0f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
         gl4duSendMatrices();
         glActiveTexture(GL_TEXTURE0);
