@@ -43,7 +43,7 @@ static void init(void) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     
-    glClearColor(0.11f, 0.11f, 0.11f, 0.11f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     
     _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
     gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
@@ -59,7 +59,7 @@ static void init(void) {
     uranus= gl4dgGenSpheref(30, 30);
     neptune = gl4dgGenSpheref(30, 30);
     etoile = gl4dgGenSpheref(1,1);
-    anneau = gl4dgGenTorusf(300, 300, 0.1f);
+    anneau = gl4dgGenTorusf(3000, 300, 0.1f);
     ecran = gl4dgGenQuadf();
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
@@ -151,6 +151,7 @@ static void draw(void) {
     gl4duPushMatrix();{
       gl4duTranslatef(0, -10.0, -100.0);
       gl4duRotatef(0, 1, 0, 0);
+      gl4duRotatef(a*1000, 0, 0, 1);
       gl4duScalef(100.0f,100.0f,100.0f);
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE0);
@@ -161,6 +162,7 @@ static void draw(void) {
       
       gl4duTranslatef(0, -10.0, 0.0);
       gl4duRotatef(-90, 1, 0, 0);
+      gl4duRotatef(-a*1000, 0, 0, 1);
       gl4duScalef(100.0f,100.0f,100.0f);
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE0);
@@ -291,7 +293,7 @@ static void draw(void) {
     {
         gl4duRotatef(a,0.0f,4.458f,0.0f);     // Ajoutez une rotation autour de l'axe des Y pour l'anneau
         gl4duTranslatef(0.0f, 0.0f, 0.0f);   // Placez l'anneau devant Saturne
-        gl4duScalef(2.4f, 0.4f, 2.4f);
+        gl4duScalef(1.9f, 0.2f, 1.9f);
         gl4duSendMatrices();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textID[9]);
