@@ -22,7 +22,7 @@ static GLuint _pId = 0;
 static GLuint soleil = 0, anneau = 0;
 static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0,etoile = 0;
 
-static GLuint textID[10] = {0};
+static GLuint textID[11] = {0};
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
@@ -57,7 +57,7 @@ static void init(void) {
     uranus= gl4dgGenSpheref(30, 30);
     neptune = gl4dgGenSpheref(30, 30);
     etoile = gl4dgGenSpheref(1,1);
-    anneau = gl4dgGenTorusf(300, 30, 0.1f);
+    anneau = gl4dgGenTorusf(300, 300, 0.1f);
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
     assert(textID[0] && textID[1] && textID[2] && textID[3] &&textID[4] && textID[5] && textID[6] && textID[7] && textID[8]);
@@ -71,8 +71,9 @@ static void init(void) {
     loadTexture(textID[6], "images/saturne.jpg");
     loadTexture(textID[7], "images/uranus.jpg");
     loadTexture(textID[8], "images/neptune.jpg");
+    loadTexture(textID[9],"images/saturnring.jpg" );
     
-    glBindTexture(GL_TEXTURE_2D, textID[9]);
+    glBindTexture(GL_TEXTURE_2D, textID[10]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -255,32 +256,40 @@ static void draw(void) {
     gl4duRotatef(a * vit_saturne * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
-    gl4duPushMatrix(); {
-
-        gl4duTranslatef(0.0f, 0.0f, -17.5f);
-        gl4duRotatef(inclinaison_saturne,1.0f,0.0f,0.0f);
-        gl4duRotatef(a,0.0f,4.458f,0.0f);
-        gl4duScalef(1.4f, 1.4f, 1.4f);
+gl4duPushMatrix();
+{
+    gl4duTranslatef(0.0f, 0.0f, -19.5f);
+    gl4duRotatef(inclinaison_saturne,1.0f,0.0f,0.0f);
+    gl4duRotatef(a,0.0f,4.458f,0.0f);
+    gl4duScalef(1.4f, 1.4f, 1.4f);
+    gl4duSendMatrices();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textID[6]);
+    gl4dgDraw(saturne);
+    
+    gl4duPushMatrix();
+    {
+        gl4duRotatef(a,0.0f,4.458f,0.0f);     // Ajoutez une rotation autour de l'axe des Y pour l'anneau
+        gl4duTranslatef(0.0f, 0.0f, 0.0f);   // Placez l'anneau devant Saturne
+        gl4duScalef(2.4f, 0.4f, 2.4f);
         gl4duSendMatrices();
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textID[6]);
-        gl4dgDraw(saturne);
-        
-        gl4duPushMatrix(); {
-          gl4duTranslatef(0.0f, 0.0f, -5.0f);
-          gl4duScalef(1.4f, 1.4f, 1.4f);
-        } gl4duPopMatrix();
-          glUniform4fv(glGetUniformLocation(_pId, "couleur"), 1, blanc);
+        glBindTexture(GL_TEXTURE_2D, textID[9]);
         gl4dgDraw(anneau);
+    }
+    gl4duPopMatrix();
 
-    } gl4duPopMatrix();
+}
+gl4duPopMatrix();
+
+
 
     gl4duRotatef(a * vit_uranus * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
 
-        gl4duTranslatef(0.0f, 0.0f, -20.5f);
+        gl4duTranslatef(0.0f, 0.0f, -24.5f);
         gl4duRotatef(inclinaison_uranus,1.0f,0.0f,0.0f);
         gl4duRotatef(a,0.0f,7.167f,0.0f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
@@ -296,7 +305,7 @@ static void draw(void) {
 
     gl4duPushMatrix(); {
 
-        gl4duTranslatef(0.0f, 0.0f, -23.4f);
+        gl4duTranslatef(0.0f, 0.0f, -26.4f);
         gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
         gl4duRotatef(a,0.0f,6.708f,0.0f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
