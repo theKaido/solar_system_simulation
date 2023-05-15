@@ -1,7 +1,7 @@
 #  Makefile 
-#  Auteur : Farès BELHADJ
-#  Email  : amsi@ai.univ-paris8.fr
-#  Date   : 29/01/2017
+#  Auteur : Mathanaruban Jonny
+#  Email  : jonnymthdev@gmail.com
+#  Date   : 15/05/2023
 
 SHELL = /bin/sh
 # définition des commandes utilisées
@@ -18,7 +18,7 @@ CPPFLAGS = -I.
 LDFLAGS = -lm
 
 # définition des fichiers et dossiers
-PROGNAME = sytemeSol
+PROGNAME = systemeSolaire
 VERSION = 1.0
 distdir = $(PROGNAME)-$(VERSION)
 HEADERS = 

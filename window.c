@@ -2,6 +2,7 @@
  * \brief géométries lumière diffuse et transformations de base en GL4Dummies
  * \author Farès BELHADJ, amsi@ai.univ-paris8.fr
  * \date April 15 2016 */
+#include <GL4D/gl4dg.h>
 #include <stdio.h>
 #include <GL4D/gl4du.h>
 #include <GL4D/gl4df.h>
@@ -21,8 +22,8 @@ static GLuint _pId = 0;
 /*!\brief quelques objets géométriques */
 static GLuint soleil = 0, anneau = 0;
 static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0,etoile = 0;
-
-static GLuint textID[11] = {0};
+static GLuint ecran =0;
+static GLuint textID[12] = {0};
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
@@ -41,7 +42,8 @@ static void init(void) {
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    glClearColor(0.11f, 0.11f, 0.11f, 0.11f);
     
     _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
     gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
@@ -58,6 +60,7 @@ static void init(void) {
     neptune = gl4dgGenSpheref(30, 30);
     etoile = gl4dgGenSpheref(1,1);
     anneau = gl4dgGenTorusf(300, 300, 0.1f);
+    ecran = gl4dgGenQuadf();
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
     assert(textID[0] && textID[1] && textID[2] && textID[3] &&textID[4] && textID[5] && textID[6] && textID[7] && textID[8]);
@@ -72,8 +75,9 @@ static void init(void) {
     loadTexture(textID[7], "images/uranus.jpg");
     loadTexture(textID[8], "images/neptune.jpg");
     loadTexture(textID[9],"images/saturnring.jpg" );
+    loadTexture(textID[10], "images/espace.jpg");
     
-    glBindTexture(GL_TEXTURE_2D, textID[10]);
+    glBindTexture(GL_TEXTURE_2D, textID[11]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -117,7 +121,6 @@ static void resize(int w, int h) {
 static void draw(void) {
 
     static GLfloat a = 0;
-    GLfloat blanc[] = {1, 1, 1, 1};
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     gl4duBindMatrix("modelViewMatrix");
     gl4duLoadIdentityf();
@@ -144,10 +147,27 @@ static void draw(void) {
     float inclinaison_saturne = 26.73f;
     float inclinaison_uranus = 97.86f;
     float inclinaison_neptune = 28.32f;
-   
-
-
-  
+    
+    gl4duPushMatrix();{
+      gl4duTranslatef(0, -10.0, -100.0);
+      gl4duRotatef(0, 1, 0, 0);
+      gl4duScalef(100.0f,100.0f,100.0f);
+      gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, textID[10]);
+      gl4dgDraw(ecran);
+    }gl4duPopMatrix();
+    gl4duPushMatrix();{
+      
+      gl4duTranslatef(0, -10.0, 0.0);
+      gl4duRotatef(-90, 1, 0, 0);
+      gl4duScalef(100.0f,100.0f,100.0f);
+      gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, textID[10]);
+      gl4dgDraw(ecran);
+    }gl4duPopMatrix();
+    
     gl4duTranslatef(0.0f, 0.0f, -40.0f); // déplacer toutes les planètes sur l'axe central
 
     
@@ -256,8 +276,8 @@ static void draw(void) {
     gl4duRotatef(a * vit_saturne * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
-gl4duPushMatrix();
-{
+  gl4duPushMatrix();{
+
     gl4duTranslatef(0.0f, 0.0f, -19.5f);
     gl4duRotatef(inclinaison_saturne,1.0f,0.0f,0.0f);
     gl4duRotatef(a,0.0f,4.458f,0.0f);
@@ -279,8 +299,7 @@ gl4duPushMatrix();
     }
     gl4duPopMatrix();
 
-}
-gl4duPopMatrix();
+  }gl4duPopMatrix();
 
 
 
@@ -305,7 +324,7 @@ gl4duPopMatrix();
 
     gl4duPushMatrix(); {
 
-        gl4duTranslatef(0.0f, 0.0f, -26.4f);
+        gl4duTranslatef(0.0f, 0.0f, -27.4f);
         gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
         gl4duRotatef(a,0.0f,6.708f,0.0f);
         gl4duScalef(1.0f, 1.0f, 1.0f);
@@ -315,6 +334,14 @@ gl4duPopMatrix();
         gl4dgDraw(neptune);
 
     } gl4duPopMatrix();
+
+
+
+    
+
+      
+
+
 
 
 
