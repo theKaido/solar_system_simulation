@@ -148,21 +148,23 @@ static void draw(void) {
     float inclinaison_uranus = 97.86f;
     float inclinaison_neptune = 28.32f;
     
+    /*Placement des backgrounds pour l'effet espace le premier dans l'axe y*/
     gl4duPushMatrix();{
       gl4duTranslatef(0, -10.0, -100.0);
       gl4duRotatef(0, 1, 0, 0);
-      gl4duRotatef(a*1000, 0, 0, 1);
+      gl4duRotatef(a*0.05f, 0, 0, 1);
       gl4duScalef(100.0f,100.0f,100.0f);
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, textID[10]);
       gl4dgDraw(ecran);
     }gl4duPopMatrix();
+    /*le second dans l'axe x */
     gl4duPushMatrix();{
       
       gl4duTranslatef(0, -10.0, 0.0);
       gl4duRotatef(-90, 1, 0, 0);
-      gl4duRotatef(-a*1000, 0, 0, 1);
+      gl4duRotatef(a*0.01f, 0, 0, 1);
       gl4duScalef(100.0f,100.0f,100.0f);
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE0);
@@ -170,9 +172,11 @@ static void draw(void) {
       gl4dgDraw(ecran);
     }gl4duPopMatrix();
     
-    gl4duTranslatef(0.0f, 0.0f, -40.0f); // déplacer toutes les planètes sur l'axe central
+    //gl4duTranslatef(0.0f, 0.0f, -40.0f); // recule la scene de 40 unité
+  gl4duLookAtf(0.0f, 20.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
 
-    
+  
+    //Astre Soleil
     gl4duPushMatrix(); {
 
      gl4duTranslatef(0, 0, 0);
@@ -186,10 +190,8 @@ static void draw(void) {
     gl4dgDraw(soleil);
    
     
-    // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
-    gl4duRotatef(
-        a * vit_mercure * 2.0f, 0.0f, 1.0f,
-        0.0f); // rotation en fonction du temps et de la vitesse orbitale
+    
+    gl4duRotatef(a * vit_mercure * 2.0f, 0.0f, 1.0f,0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
     // Planète Mercure
@@ -205,11 +207,8 @@ static void draw(void) {
 
     }gl4duPopMatrix();
 
-   // Faire tourner toutes les planètes autour de l'axe central à une vitesse
-   // différente
-    gl4duRotatef(
-        a * vit_venus * 2.0f, 0.0f, 1.0f,
-        0.0f); // rotation en fonction du temps et de la vitesse orbitale
+   
+    gl4duRotatef(a * vit_venus * 2.0f, 0.0f, 1.0f,0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
     // Planète Vénus
@@ -225,7 +224,7 @@ static void draw(void) {
 
     }gl4duPopMatrix();
     
-    // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
+    
     gl4duRotatef(a * vit_terre * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
     
@@ -242,7 +241,7 @@ static void draw(void) {
 
     } gl4duPopMatrix();
     
-    // Faire tourner toutes les planètes autour de l'axe central à une vitesse différente
+    
     gl4duRotatef(a * vit_mars * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
     
@@ -277,7 +276,7 @@ static void draw(void) {
 
     gl4duRotatef(a * vit_saturne * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
-
+  //Planete Saturne
   gl4duPushMatrix();{
 
     gl4duTranslatef(0.0f, 0.0f, -19.5f);
@@ -308,6 +307,7 @@ static void draw(void) {
     gl4duRotatef(a * vit_uranus * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
+  //Planete Uranus
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -24.5f);
@@ -324,6 +324,7 @@ static void draw(void) {
     gl4duRotatef(a * vit_neptune * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
     gl4duSendMatrices();
 
+    //Planete Neptune
     gl4duPushMatrix(); {
 
         gl4duTranslatef(0.0f, 0.0f, -27.4f);
@@ -349,10 +350,7 @@ static void draw(void) {
 
   
   
-  /* Décommenter pour avoir un rendu sympathique pour pas cher :) */
-  /*   gl4dfBlur(0, 0, 5, 1, 0, GL_FALSE); */
-  /*   gl4dfSobelSetMixMode(GL4DF_SOBEL_MIX_MULT); */
-  /*   gl4dfSobel(0, 0, GL_FALSE); */
+   /*Décommenter pour avoir un rendu sympathique pour pas cher :) */
   a = a + 1.1f;
 
   
