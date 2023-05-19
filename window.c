@@ -11,6 +11,8 @@
 /* Prototypes des fonctions statiques contenues dans ce fichier C */
 static void init(void);
 static void loadTexture(GLuint id, const char * filename);
+static void keyup(int keycode);
+static void keydown(int keycode);
 static void resize(int w, int h);
 static void draw(void);
 static void quit(void);
@@ -24,6 +26,8 @@ static GLuint soleil = 0, anneau = 0;
 static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0,etoile = 0;
 static GLuint ecran =0;
 static GLuint textID[12] = {0};
+static GLuint _pause = 0;
+static GLuint _vue = 0;
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
@@ -33,6 +37,8 @@ int main(int argc, char ** argv) {
   init();
   atexit(quit);
   gl4duwResizeFunc(resize);
+  gl4duwKeyUpFunc(keyup);
+  gl4duwKeyDownFunc(keydown);
   gl4duwDisplayFunc(draw);
   gl4duwMainLoop();
   return 0;
@@ -117,11 +123,46 @@ static void resize(int w, int h) {
   //gl4duOrthof(-3.5, 3.5, -3.5 * _wH / _wW, 3.5 * _wH / _wW, 1.0, 30.0);
   gl4duBindMatrix("modelViewMatrix");
 }
+
+static void keyup(int keycode) {
+  switch(keycode) {
+  default:
+    break;
+  }
+}
+static void keydown(int keycode) {
+  GLint v[2];
+  switch(keycode) {
+
+    case 'm' :
+      _vue = (_vue +1)%2;
+      break;
+    case 'w':
+      glGetIntegerv(GL_POLYGON_MODE, v);
+      if(v[0] == GL_FILL)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      break;
+    case ' ':
+      _pause = !_pause;
+      break;
+    case 'q':
+      exit(0);
+      break;
+    default:
+      break;
+  }
+}
 /*!\brief dessine dans le contexte OpenGL actif. */
 static void draw(void) {
 
     static GLfloat a = 0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    static Uint32 t0 = 0 ,t;
+    GLfloat dt = 0.0;
+    dt = ((t = SDL_GetTicks()) - t0) / 1000.0;
+    t0 = t;
     gl4duBindMatrix("modelViewMatrix");
     gl4duLoadIdentityf();
     glUseProgram(_pId);
@@ -172,15 +213,17 @@ static void draw(void) {
       gl4dgDraw(ecran);
     }gl4duPopMatrix();
     
-    //gl4duTranslatef(0.0f, 0.0f, -40.0f); // recule la scene de 40 unité
-  gl4duLookAtf(0.0f, 20.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
+    if(_vue == 0)
+      gl4duLookAtf(0.0f, 20.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
+    else
+    gl4duTranslatef(0.0f, 0.0f, -40.0f);
 
-  
+
     //Astre Soleil
     gl4duPushMatrix(); {
 
      gl4duTranslatef(0, 0, 0);
-     gl4duRotatef(a, 0, 2, 0);
+     gl4duRotatef(a, 0, 0.002f, 0);
      gl4duScalef(3.5f, 3.5f, 3.5f);
      gl4duSendMatrices();
     
@@ -214,13 +257,13 @@ static void draw(void) {
     // Planète Vénus
     gl4duPushMatrix();{
 
-    gl4duTranslatef(0.0f, 0.0f, -6.5f);
-    gl4duRotatef(inclinaison_venus,1.0f,0.0f,0.0f);
-    gl4duRotatef(a,0.0f,0.243f,0.0f);
-    gl4duScalef(0.7f, 0.7f, 0.7f);
-    gl4duSendMatrices();
-    glBindTexture(GL_TEXTURE_2D, textID[2]);
-    gl4dgDraw(venus);
+      gl4duTranslatef(0.0f, 0.0f, -6.5f);
+      gl4duRotatef(inclinaison_venus,1.0f,0.0f,0.0f);
+      gl4duRotatef(a,0.0f,0.243f,0.0f);
+      gl4duScalef(0.7f, 0.7f, 0.7f);
+      gl4duSendMatrices();
+      glBindTexture(GL_TEXTURE_2D, textID[2]);
+      gl4dgDraw(venus);
 
     }gl4duPopMatrix();
     
@@ -290,69 +333,55 @@ static void draw(void) {
     
     gl4duPushMatrix();
     {
-        gl4duRotatef(a,0.0f,4.458f,0.0f);     // Ajoutez une rotation autour de l'axe des Y pour l'anneau
-        gl4duTranslatef(0.0f, 0.0f, 0.0f);   // Placez l'anneau devant Saturne
-        gl4duScalef(1.9f, 0.2f, 1.9f);
-        gl4duSendMatrices();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textID[9]);
-        gl4dgDraw(anneau);
+      gl4duRotatef(a,0.0f,4.458f,0.0f);     // Ajoutez une rotation autour de l'axe des Y pour l'anneau
+      gl4duTranslatef(0.0f, 0.0f, 0.0f);   // Placez l'anneau devant Saturne
+      gl4duScalef(1.9f, 0.2f, 1.9f);
+      gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, textID[9]);
+      gl4dgDraw(anneau);
     }
     gl4duPopMatrix();
-
   }gl4duPopMatrix();
 
 
 
-    gl4duRotatef(a * vit_uranus * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
-    gl4duSendMatrices();
+  gl4duRotatef(a * vit_uranus * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
+  gl4duSendMatrices();
 
   //Planete Uranus
-    gl4duPushMatrix(); {
+  gl4duPushMatrix(); {
 
-        gl4duTranslatef(0.0f, 0.0f, -24.5f);
-        gl4duRotatef(inclinaison_uranus,1.0f,0.0f,0.0f);
-        gl4duRotatef(a,0.0f,7.167f,0.0f);
-        gl4duScalef(1.0f, 1.0f, 1.0f);
-        gl4duSendMatrices();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textID[7]);
-        gl4dgDraw(uranus);
-
-    } gl4duPopMatrix();
-
-    gl4duRotatef(a * vit_neptune * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
+    gl4duTranslatef(0.0f, 0.0f, -24.5f);
+    gl4duRotatef(inclinaison_uranus,1.0f,0.0f,0.0f);
+    gl4duRotatef(a,0.0f,7.167f,0.0f);
+    gl4duScalef(1.0f, 1.0f, 1.0f);
     gl4duSendMatrices();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textID[7]);
+    gl4dgDraw(uranus);
+
+  } gl4duPopMatrix();
+
+  gl4duRotatef(a * vit_neptune * 2.0f, 0.0f, 1.0f, 0.0f); // rotation en fonction du temps et de la vitesse orbitale
+  gl4duSendMatrices();
 
     //Planete Neptune
-    gl4duPushMatrix(); {
+  gl4duPushMatrix(); {
 
-        gl4duTranslatef(0.0f, 0.0f, -27.4f);
-        gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
-        gl4duRotatef(a,0.0f,6.708f,0.0f);
-        gl4duScalef(1.0f, 1.0f, 1.0f);
-        gl4duSendMatrices();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textID[8]);
-        gl4dgDraw(neptune);
+    gl4duTranslatef(0.0f, 0.0f, -27.4f);
+    gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
+    gl4duRotatef(a,0.0f,6.708f,0.0f);
+    gl4duScalef(1.0f, 1.0f, 1.0f);
+    gl4duSendMatrices();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textID[8]);
+    gl4dgDraw(neptune);
 
-    } gl4duPopMatrix();
+  } gl4duPopMatrix();
 
-
-
-    
-
-      
-
-
-
-
-
-  
-  
-   /*Décommenter pour avoir un rendu sympathique pour pas cher :) */
-  a = a + 1.1f;
-
+    if(!_pause)
+    a = a + 1.1f;
   
 }
 /*!\brief appelée au moment de sortir du programme (atexit), libère les éléments utilisés */
