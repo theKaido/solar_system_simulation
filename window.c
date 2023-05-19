@@ -28,6 +28,7 @@ static GLuint ecran =0;
 static GLuint textID[12] = {0};
 static GLuint _pause = 0;
 static GLuint _vue = 0;
+static GLuint _timer = 0;
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
@@ -133,6 +134,10 @@ static void keyup(int keycode) {
 static void keydown(int keycode) {
   GLint v[2];
   switch(keycode) {
+    case 'a' :
+          _timer = !_timer;
+          break;
+
 
     case 'm' :
       _vue = (_vue +1)%2;
@@ -160,7 +165,7 @@ static void draw(void) {
     static GLfloat a = 0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     static Uint32 t0 = 0 ,t;
-    GLfloat dt = 0.0;
+    GLfloat dt = 0.0,delai = 0.2f;
     dt = ((t = SDL_GetTicks()) - t0) / 1000.0;
     t0 = t;
     gl4duBindMatrix("modelViewMatrix");
@@ -168,6 +173,15 @@ static void draw(void) {
     glUseProgram(_pId);
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+
+    static GLfloat distance_mercure;
+    static GLfloat distance_venus;
+    static GLfloat distance_terre;
+    static GLfloat distance_mars;
+    static GLfloat distance_jupiter;
+    static GLfloat distance_saturne;
+    static GLfloat distance_uranus;
+    static GLfloat distance_neptune;
 
 
 
@@ -367,9 +381,13 @@ static void draw(void) {
   gl4duSendMatrices();
 
     //Planete Neptune
+  distance_neptune = -27.4f;
   gl4duPushMatrix(); {
-
-    gl4duTranslatef(0.0f, 0.0f, -27.4f);
+    if (!_timer) {
+      _timer = SDL_GetTicks();
+      dt = (SDL_GetTicks() - _timer)/1000;
+    }
+    gl4duTranslatef(0.0f, 0.0f, distance_neptune);
     gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
     gl4duRotatef(a,0.0f,6.708f,0.0f);
     gl4duScalef(1.0f, 1.0f, 1.0f);
