@@ -103,17 +103,18 @@ static void loadTexture(GLuint id, const char * filename) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   if( (t = IMG_Load(filename)) != NULL ) {
 #ifdef __APPLE__
-    int mode = t->format->BytesPerPixel == 4 ? GL_BGRA : GL_BGR;
-#else
     int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
+#else
+    int mode = t->format->BytesPerPixel == 4 ? GL_BGRA : GL_BGR;
 #endif       
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t->w, t->h, 0, mode, GL_UNSIGNED_BYTE, t->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, mode, t->w, t->h, 0, mode, GL_UNSIGNED_BYTE, t->pixels);
     SDL_FreeSurface(t);
   } else {
     fprintf(stderr, "can't open file %s : %s\n", filename, SDL_GetError());
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   }
 }
+
 
 /*!\brief Cette fonction paramétre la vue (viewport) OpenGL en
  * fonction des dimensions de la fenêtre.*/
@@ -175,6 +176,7 @@ static void draw(void) {
     gl4duBindMatrix("modelViewMatrix");
     gl4duLoadIdentityf();
     glUseProgram(_pId);
+    glDisable(GL_LIGHTING);
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
 
@@ -484,7 +486,7 @@ static void draw(void) {
   } gl4duPopMatrix();
 
     if(!_pause)
-    a = a + 10.1f;
+    a = a + 1.1f;
   
 }
 /*!\brief appelée au moment de sortir du programme (atexit), libère les éléments utilisés */
