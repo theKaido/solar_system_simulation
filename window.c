@@ -170,7 +170,7 @@ static void draw(void) {
     static GLfloat a = 0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     static Uint32 t0 = 0 ,t;
-    GLfloat dt = 0.0,delai = 1.0f,delai_sun = 0.0002f;
+    GLfloat dt = 0.0,delai = 1.0f,delai_sun = 0.2f;
     dt = ((t = SDL_GetTicks()) - t0) / 1000.0;
     t0 = t;
     gl4duBindMatrix("modelViewMatrix");
@@ -237,7 +237,19 @@ static void draw(void) {
 
       gl4duTranslatef(0, 0, 0);
       gl4duRotatef(a, 0, 0.002f, 0);
-      gl4duScalef(taille_sun, taille_sun, taille_sun);
+      if (_timer && !_pause) {
+        if (taille_sun < 5.0f) {
+          taille_sun += dt* delai_sun;
+          gl4duScalef(taille_sun,taille_sun,taille_sun);
+          if(taille_sun > taille_sun ){
+            taille_sun = 5.0f;
+          }
+        }
+        printf("taille soleil %f\n",taille_sun);
+      }
+      else {
+        gl4duScalef(taille_sun,taille_sun, taille_sun);
+      }
       gl4duSendMatrices();
     
     } gl4duPopMatrix();
@@ -449,6 +461,7 @@ static void draw(void) {
     
       gl4duRotatef(inclinaison_uranus,1.0f,0.0f,0.0f);
       gl4duRotatef(a,0.0f,7.167f,0.0f);
+
       gl4duScalef(1.0f, 1.0f, 1.0f);
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE0);
