@@ -8,6 +8,8 @@
 #include <GL4D/gl4df.h>
 #include <GL4D/gl4duw_SDL2.h>
 #include <SDL_image.h>
+
+
 /* Prototypes des fonctions statiques contenues dans ce fichier C */
 static void init(void);
 static void loadTexture(GLuint id, const char * filename);
@@ -29,6 +31,7 @@ static GLuint textID[12] = {0};
 static GLuint _pause = 0;
 static GLuint _vue = 0;
 static GLuint _timer = 0;
+static GLuint _reset = 0;
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
@@ -137,10 +140,11 @@ static void keydown(int keycode) {
     case 'a' :
           _timer = !_timer;
           break;
-
-
     case 'm' :
       _vue = (_vue +1)%2;
+      break;
+    case 'r' :
+      _reset = !_reset;
       break;
     case 'w':
       glGetIntegerv(GL_POLYGON_MODE, v);
@@ -165,7 +169,7 @@ static void draw(void) {
     static GLfloat a = 0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     static Uint32 t0 = 0 ,t;
-    GLfloat dt = 0.0,delai = 0.2f;
+    GLfloat dt = 0.0,delai = 1.0f,delai_sun = 0.0002f;
     dt = ((t = SDL_GetTicks()) - t0) / 1000.0;
     t0 = t;
     gl4duBindMatrix("modelViewMatrix");
@@ -174,26 +178,31 @@ static void draw(void) {
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
 
-    static GLfloat distance_mercure;
-    static GLfloat distance_venus;
-    static GLfloat distance_terre;
-    static GLfloat distance_mars;
-    static GLfloat distance_jupiter;
-    static GLfloat distance_saturne;
-    static GLfloat distance_uranus;
-    static GLfloat distance_neptune;
+    //Taille du soleil
+    static float taille_sun = 4.0f;
+
+    /*Distance des planete*/
+    static float distance_mercure = 9.0f ;
+    static float distance_venus = 11.5f;
+    static float distance_terre = 14.5f;
+    static float distance_mars = 16.7f;
+    static float distance_jupiter = 19.9f;
+    static float distance_saturne = 25.5f;
+    static float distance_uranus = 30.5f;
+    static float distance_neptune = 33.4f ;
 
 
-
-    float vit_mercure = 0.04f; // vitesse orbitale de Mercure
-    float vit_venus = 0.02f; // vitesse orbitale de Vénus 
-    float vit_terre = 0.01f; // vitesse orbitale de la Terre 
-    float vit_mars = 0.008f; // vitesse orbitale de Mars 
+    /*Vitesse en orbite des planetes */
+    float vit_mercure = 0.04f;
+    float vit_venus = 0.02f; 
+    float vit_terre = 0.01f; 
+    float vit_mars = 0.008f; 
     float vit_jupiter = 0.005f;
     float vit_saturne = 0.003f;
     float vit_uranus = 0.002f;
     float vit_neptune = 0.0015f;
 
+    /*Inclinaison des planetes par rapport à leur rotation */
     float inclinaison_mercure = 7.005f;
     float inclinaison_venus = 3.39471f;
     float inclinaison_terre = 23.43929f;
@@ -205,21 +214,9 @@ static void draw(void) {
     
     /*Placement des backgrounds pour l'effet espace le premier dans l'axe y*/
     gl4duPushMatrix();{
-      gl4duTranslatef(0, -10.0, -100.0);
+      gl4duTranslatef(0, -40.0, -100.0);
       gl4duRotatef(0, 1, 0, 0);
       gl4duRotatef(a*0.05f, 0, 0, 1);
-      gl4duScalef(100.0f,100.0f,100.0f);
-      gl4duSendMatrices();
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, textID[10]);
-      gl4dgDraw(ecran);
-    }gl4duPopMatrix();
-    /*le second dans l'axe x */
-    gl4duPushMatrix();{
-      
-      gl4duTranslatef(0, -10.0, 0.0);
-      gl4duRotatef(-90, 1, 0, 0);
-      gl4duRotatef(a*0.01f, 0, 0, 1);
       gl4duScalef(100.0f,100.0f,100.0f);
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE0);
@@ -230,16 +227,16 @@ static void draw(void) {
     if(_vue == 0)
       gl4duLookAtf(0.0f, 20.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
     else
-    gl4duTranslatef(0.0f, 0.0f, -40.0f);
+      gl4duLookAtf(0.0f, 70.0f, 0.0f,0.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
 
 
     //Astre Soleil
     gl4duPushMatrix(); {
 
-     gl4duTranslatef(0, 0, 0);
-     gl4duRotatef(a, 0, 0.002f, 0);
-     gl4duScalef(3.5f, 3.5f, 3.5f);
-     gl4duSendMatrices();
+      gl4duTranslatef(0, 0, 0);
+      gl4duRotatef(a, 0, 0.002f, 0);
+      gl4duScalef(taille_sun, taille_sun, taille_sun);
+      gl4duSendMatrices();
     
     } gl4duPopMatrix();
     
@@ -253,8 +250,18 @@ static void draw(void) {
 
     // Planète Mercure
     gl4duPushMatrix();{
-
-        gl4duTranslatef(0.0f, 0.0f, -5.0f);
+      if (_timer && !_pause) {
+        if (distance_mercure > 0.0f) {
+          distance_mercure -= dt * delai;
+          gl4duTranslatef(0.0f, 0.0f, -(distance_mercure));
+          if(distance_mercure < 0.0f){
+            distance_mercure = 0.0f;
+          }
+        }
+      }
+      else { 
+        gl4duTranslatef(0.0f, 0.0f, -(distance_mercure));
+      }
         gl4duRotatef(inclinaison_mercure,1.0f,0.0f,0.0f);
         gl4duRotatef(a,0.0f,0.58f,0.0f);
         gl4duScalef(0.4f, 0.4f, 0.4f);
@@ -270,8 +277,19 @@ static void draw(void) {
 
     // Planète Vénus
     gl4duPushMatrix();{
-
-      gl4duTranslatef(0.0f, 0.0f, -6.5f);
+    if (_timer && !_pause) {
+      if (distance_venus > 0.0f) {
+        distance_venus -= dt * delai;
+        gl4duTranslatef(0.0f, 0.0f, -(distance_venus));
+        if(distance_venus < 0.0f){
+          distance_venus = 0.0f;
+        }
+        
+      }
+    }
+    else { 
+      gl4duTranslatef(0.0f, 0.0f, -(distance_venus));
+    }
       gl4duRotatef(inclinaison_venus,1.0f,0.0f,0.0f);
       gl4duRotatef(a,0.0f,0.243f,0.0f);
       gl4duScalef(0.7f, 0.7f, 0.7f);
@@ -287,14 +305,26 @@ static void draw(void) {
     
     // Planète Terre
     gl4duPushMatrix(); {
-
-        gl4duTranslatef(0.0f, 0.0f, -8.5f);
-        gl4duRotatef(inclinaison_terre,1.0f,0.0f,0.0f);
-        gl4duRotatef(a,0.0f,1.0f,0.0f);
-        gl4duScalef(0.7f, 0.7f, 0.7f);
-        gl4duSendMatrices();
-        glBindTexture(GL_TEXTURE_2D, textID[3]);
-        gl4dgDraw(terre);
+    if (_timer && !_pause) {
+      if (distance_terre > 0.0f) {
+        distance_terre -= dt * delai;
+        gl4duTranslatef(0.0f, 0.0f, -(distance_terre));
+        if(distance_terre < 0.0f){
+          distance_terre = 0.0f;
+        }
+        
+      }
+    }
+    else { 
+      gl4duTranslatef(0.0f, 0.0f, -(distance_terre));
+    }
+      
+      gl4duRotatef(inclinaison_terre,1.0f,0.0f,0.0f);
+      gl4duRotatef(a,0.0f,1.0f,0.0f);
+      gl4duScalef(0.7f, 0.7f, 0.7f);
+      gl4duSendMatrices();
+      glBindTexture(GL_TEXTURE_2D, textID[3]);
+      gl4dgDraw(terre);
 
     } gl4duPopMatrix();
     
@@ -304,8 +334,21 @@ static void draw(void) {
     
     // Planète Mars
     gl4duPushMatrix(); {
+    if (_timer && !_pause) {
+      if (distance_mars > 0.0f) {
+        distance_mars -= dt * delai;
+        gl4duTranslatef(0.0f, 0.0f, -(distance_mars));
+        if(distance_mars < 0.0f){
+          distance_mars = 0.0f;
+        }
+        
+      }
+    }
+    else { 
+      gl4duTranslatef(0.0f, 0.0f, -(distance_mars));
+    }
 
-        gl4duTranslatef(0.0f, 0.0f, -10.7f);
+    
         gl4duRotatef(inclinaison_mars,1.0f,0.0f,0.0f);
         gl4duRotatef(a,0.0f,1.025f,0.0f);
         gl4duScalef(0.5f, 0.5f, 0.5f);
@@ -320,8 +363,19 @@ static void draw(void) {
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
-
-        gl4duTranslatef(0.0f, 0.0f, -13.9f);
+    if (_timer && !_pause) {
+      if (distance_jupiter > 0.0f) {
+        distance_jupiter -= dt * delai;
+        gl4duTranslatef(0.0f, 0.0f, -(distance_jupiter));
+        if(distance_jupiter < 0.0f){
+          distance_jupiter = 0.0f;
+        }
+        
+      }
+    }
+    else { 
+      gl4duTranslatef(0.0f, 0.0f, -(distance_jupiter));
+    }
         gl4duRotatef(inclinaison_jupiter,1.0f,0.0f,0.0f);
         gl4duRotatef(a,0.0f,4.125f,0.0f);
         gl4duScalef(1.7f, 1.7f, 1.7f);
@@ -335,15 +389,26 @@ static void draw(void) {
     gl4duSendMatrices();
   //Planete Saturne
   gl4duPushMatrix();{
-
-    gl4duTranslatef(0.0f, 0.0f, -19.5f);
-    gl4duRotatef(inclinaison_saturne,1.0f,0.0f,0.0f);
-    gl4duRotatef(a,0.0f,4.458f,0.0f);
-    gl4duScalef(1.4f, 1.4f, 1.4f);
-    gl4duSendMatrices();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textID[6]);
-    gl4dgDraw(saturne);
+    if (_timer && !_pause) {
+      if (distance_saturne > 0.0f) {
+        distance_saturne -= dt * delai;
+        gl4duTranslatef(0.0f, 0.0f, -(distance_saturne));
+        if(distance_saturne < 0.0f){
+          distance_saturne = 0.0f;
+        }
+        
+      }
+    }
+    else { 
+      gl4duTranslatef(0.0f, 0.0f, -(distance_saturne));
+    }
+      gl4duRotatef(inclinaison_saturne,1.0f,0.0f,0.0f);
+      gl4duRotatef(a,0.0f,4.458f,0.0f);
+      gl4duScalef(1.4f, 1.4f, 1.4f);
+      gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, textID[6]);
+      gl4dgDraw(saturne);
     
     gl4duPushMatrix();
     {
@@ -365,15 +430,28 @@ static void draw(void) {
 
   //Planete Uranus
   gl4duPushMatrix(); {
+    if (_timer && !_pause) {
+        if (distance_uranus > 0.0f) {
+          distance_uranus -= dt * delai;
+          gl4duTranslatef(0.0f, 0.0f, -(distance_uranus));
+          if(distance_uranus < 0.0f){
+            distance_uranus = 0.0f;
+          }
+        
+        }
+    }
+    else { 
+      gl4duTranslatef(0.0f, 0.0f, -(distance_uranus));
+    }
 
-    gl4duTranslatef(0.0f, 0.0f, -24.5f);
-    gl4duRotatef(inclinaison_uranus,1.0f,0.0f,0.0f);
-    gl4duRotatef(a,0.0f,7.167f,0.0f);
-    gl4duScalef(1.0f, 1.0f, 1.0f);
-    gl4duSendMatrices();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textID[7]);
-    gl4dgDraw(uranus);
+    
+      gl4duRotatef(inclinaison_uranus,1.0f,0.0f,0.0f);
+      gl4duRotatef(a,0.0f,7.167f,0.0f);
+      gl4duScalef(1.0f, 1.0f, 1.0f);
+      gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, textID[7]);
+      gl4dgDraw(uranus);
 
   } gl4duPopMatrix();
 
@@ -381,25 +459,32 @@ static void draw(void) {
   gl4duSendMatrices();
 
     //Planete Neptune
-  distance_neptune = -27.4f;
   gl4duPushMatrix(); {
-    if (!_timer) {
-      _timer = SDL_GetTicks();
-      dt = (SDL_GetTicks() - _timer)/1000;
+    if (_timer && !_pause) {
+        if (distance_neptune > 0.0f) {
+          distance_neptune -= dt * delai;
+          gl4duTranslatef(0.0f, 0.0f, -(distance_neptune));
+          if(distance_neptune < 0.0f){
+            distance_neptune = 0.0f;
+          }
+        
+        }
     }
-    gl4duTranslatef(0.0f, 0.0f, distance_neptune);
-    gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
-    gl4duRotatef(a,0.0f,6.708f,0.0f);
-    gl4duScalef(1.0f, 1.0f, 1.0f);
-    gl4duSendMatrices();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textID[8]);
-    gl4dgDraw(neptune);
+    else {
+      gl4duTranslatef(0.0f, 0.0f, -(distance_neptune));
+    }
+      gl4duRotatef(inclinaison_neptune,1.0f,0.0f,0.0f);
+      gl4duRotatef(a,0.0f,6.708f,0.0f);
+      gl4duScalef(1.0f, 1.0f, 1.0f);
+      gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, textID[8]);
+      gl4dgDraw(neptune);
 
   } gl4duPopMatrix();
 
     if(!_pause)
-    a = a + 1.1f;
+    a = a + 10.1f;
   
 }
 /*!\brief appelée au moment de sortir du programme (atexit), libère les éléments utilisés */
