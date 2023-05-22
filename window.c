@@ -86,7 +86,7 @@ static void init(void) {
     loadTexture(textID[8], "images/neptune.jpg");
     loadTexture(textID[9],"images/saturnring.jpg" );
     loadTexture(textID[10], "images/espace.jpg");
-    loadTexture(textID[11],"images/trou_noir.png");
+    loadTexture(textID[11],"images/trou_noir.jpg");
     
     glBindTexture(GL_TEXTURE_2D, textID[12]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -171,7 +171,7 @@ static void draw(void) {
     static GLfloat a = 0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     static Uint32 t0 = 0 ,t;
-    GLfloat dt = 0.0,delai = 1.0f,delai_sun = 0.02f;
+    GLfloat dt = 0.0,delai = 0.5f,delai_sun = 0.02f;
     dt = ((t = SDL_GetTicks()) - t0) / 1000.0;
     t0 = t;
     gl4duBindMatrix("modelViewMatrix");
@@ -216,7 +216,7 @@ static void draw(void) {
     
     /*Placement des backgrounds pour l'effet espace le premier dans l'axe y*/
     gl4duPushMatrix();{
-      gl4duTranslatef(0, -40.0, -100.0);
+      gl4duTranslatef(0, 0.0, -100.0);
       gl4duRotatef(0, 1, 0, 0);
       gl4duRotatef(a*0.05f, 0, 0, 1);
       gl4duScalef(100.0f,100.0f,100.0f);
@@ -504,7 +504,7 @@ static void draw(void) {
   } gl4duPopMatrix();
 
     if(!_pause)
-    a = a + 1.1f;
+    a = a + 5.1f;
   
 }
 /*!\brief appelée au moment de sortir du programme (atexit), libère les éléments utilisés */
