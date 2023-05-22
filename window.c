@@ -27,7 +27,7 @@ static GLuint _pId = 0;
 static GLuint soleil = 0, anneau = 0;
 static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0,etoile = 0;
 static GLuint ecran =0;
-static GLuint textID[12] = {0};
+static GLuint textID[13] = {0};
 static GLuint _pause = 0;
 static GLuint _vue = 0;
 static GLuint _timer = 0;
@@ -73,7 +73,7 @@ static void init(void) {
     ecran = gl4dgGenQuadf();
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
-    assert(textID[0] && textID[1] && textID[2] && textID[3] &&textID[4] && textID[5] && textID[6] && textID[7] && textID[8]);
+    assert(textID[0] && textID[1] && textID[2] && textID[3] &&textID[4] && textID[5] && textID[6] && textID[7] && textID[8] && textID[9] && textID[10] && textID[11]);
 
     loadTexture(textID[0], "images/soleil.jpg");
     loadTexture(textID[1], "images/mercure.jpg");
@@ -86,8 +86,9 @@ static void init(void) {
     loadTexture(textID[8], "images/neptune.jpg");
     loadTexture(textID[9],"images/saturnring.jpg" );
     loadTexture(textID[10], "images/espace.jpg");
+    loadTexture(textID[11],"images/trou_noir.png");
     
-    glBindTexture(GL_TEXTURE_2D, textID[11]);
+    glBindTexture(GL_TEXTURE_2D, textID[12]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -103,9 +104,9 @@ static void loadTexture(GLuint id, const char * filename) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   if( (t = IMG_Load(filename)) != NULL ) {
 #ifdef __APPLE__
-    int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
-#else
     int mode = t->format->BytesPerPixel == 4 ? GL_BGRA : GL_BGR;
+#else
+    int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
 #endif       
     glTexImage2D(GL_TEXTURE_2D, 0, mode, t->w, t->h, 0, mode, GL_UNSIGNED_BYTE, t->pixels);
     SDL_FreeSurface(t);
@@ -170,18 +171,17 @@ static void draw(void) {
     static GLfloat a = 0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     static Uint32 t0 = 0 ,t;
-    GLfloat dt = 0.0,delai = 1.0f,delai_sun = 0.2f;
+    GLfloat dt = 0.0,delai = 1.0f,delai_sun = 0.02f;
     dt = ((t = SDL_GetTicks()) - t0) / 1000.0;
     t0 = t;
     gl4duBindMatrix("modelViewMatrix");
     gl4duLoadIdentityf();
     glUseProgram(_pId);
-    glDisable(GL_LIGHTING);
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
 
     //Taille du soleil
-    static float taille_sun = 4.0f;
+    static float taille_sun = 3.5f;
 
     /*Distance des planete*/
     static float distance_mercure = 9.0f ;
@@ -232,29 +232,34 @@ static void draw(void) {
       gl4duLookAtf(0.0f, 70.0f, 0.0f,0.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
 
 
+    static float facteur_agrandir = 1.1f;
+    static float taille_max = 6.0f;
     //Astre Soleil
     gl4duPushMatrix(); {
 
       gl4duTranslatef(0, 0, 0);
       gl4duRotatef(a, 0, 0.002f, 0);
       if (_timer && !_pause) {
-        if (taille_sun < 5.0f) {
-          taille_sun += dt* delai_sun;
-          gl4duScalef(taille_sun,taille_sun,taille_sun);
-          if(taille_sun > taille_sun ){
-            taille_sun = 5.0f;
+        if (taille_sun < taille_max) {
+          taille_sun += (facteur_agrandir * delai_sun);
+          if(taille_sun > taille_max ){
+            taille_sun = taille_max;
+            
           }
         }
-        printf("taille soleil %f\n",taille_sun);
       }
-      else {
-        gl4duScalef(taille_sun,taille_sun, taille_sun);
-      }
+      gl4duScalef(taille_sun, taille_sun, taille_sun);
+     
       gl4duSendMatrices();
     
     } gl4duPopMatrix();
+    if (taille_sun == taille_max && _timer) {
+      glBindTexture(GL_TEXTURE_2D,textID[11]);
+    }else {
+
+      glBindTexture(GL_TEXTURE_2D, textID[0]);
+    }
     
-    glBindTexture(GL_TEXTURE_2D, textID[0]);
     gl4dgDraw(soleil);
    
     
