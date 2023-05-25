@@ -103,11 +103,7 @@ static void loadTexture(GLuint id, const char * filename) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   if( (t = IMG_Load(filename)) != NULL ) {
-#ifdef __APPLE__
-    int mode = t->format->BytesPerPixel == 4 ? GL_BGRA : GL_BGR;
-#else
-    int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
-#endif       
+    int mode = t->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;      
     glTexImage2D(GL_TEXTURE_2D, 0, mode, t->w, t->h, 0, mode, GL_UNSIGNED_BYTE, t->pixels);
     SDL_FreeSurface(t);
   } else {
@@ -517,10 +513,14 @@ static void draw(void) {
       gl4dgDraw(neptune);
 
   } gl4duPopMatrix();
+  #ifdef __APPLE__
+    if (!_pause)
+      a = a + 2.1f;
+    #else
+      if (!_pause)
+        a += 5.1f;
+  #endif
 
-    if(!_pause)
-    a = a + 5.1f;
-  
 }
 /*!\brief appelée au moment de sortir du programme (atexit), libère les éléments utilisés */
 static void quit(void) {
