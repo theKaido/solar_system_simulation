@@ -233,18 +233,31 @@ static void draw(void) {
 
 
     static float facteur_agrandir = 1.1f;
+    static float facteur_reduire = 1.0f;
     static float taille_max = 6.0f;
+    static float taille_min = 2.5f;
+    static float grand = 0 ;
     //Astre Soleil
     gl4duPushMatrix(); {
 
       gl4duTranslatef(0, 0, 0);
       gl4duRotatef(a, 0, 0.002f, 0);
       if (_timer && !_pause) {
-        if (taille_sun < taille_max) {
-          taille_sun += (facteur_agrandir * delai_sun);
-          if(taille_sun > taille_max ){
-            taille_sun = taille_max;
+        if(grand == 0){
+          if (taille_sun < taille_max) {
+            taille_sun += (facteur_agrandir * delai_sun);
+            if(taille_sun > taille_max ){
+              taille_sun = taille_max;
+              grand++;
             
+            }
+          }
+        }else {
+          if (taille_sun > taille_min) {
+            taille_sun -= (facteur_reduire * delai_sun);
+            if (taille_sun< taille_min) {
+              taille_sun = taille_min;
+            }
           }
         }
       }
@@ -253,7 +266,7 @@ static void draw(void) {
       gl4duSendMatrices();
     
     } gl4duPopMatrix();
-    if (taille_sun == taille_max && _timer) {
+    if (taille_sun == taille_min && _timer) {
       glBindTexture(GL_TEXTURE_2D,textID[11]);
     }else {
 
@@ -273,8 +286,8 @@ static void draw(void) {
         if (distance_mercure > 0.0f) {
           distance_mercure -= dt * delai;
           gl4duTranslatef(0.0f, 0.0f, -(distance_mercure));
-          if(distance_mercure < 0.0f){
-            distance_mercure = 0.0f;
+          if(distance_mercure < 1.5f){
+            gl4dgDelete(mercure);
           }
         }
       }
@@ -300,8 +313,8 @@ static void draw(void) {
       if (distance_venus > 0.0f) {
         distance_venus -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_venus));
-        if(distance_venus < 0.0f){
-          distance_venus = 0.0f;
+        if(distance_venus < 1.5f){
+          gl4dgDelete(venus);
         }
         
       }
@@ -328,8 +341,8 @@ static void draw(void) {
       if (distance_terre > 0.0f) {
         distance_terre -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_terre));
-        if(distance_terre < 0.0f){
-          distance_terre = 0.0f;
+        if(distance_terre < 1.5f){
+          gl4dgDelete(terre);
         }
         
       }
@@ -357,8 +370,8 @@ static void draw(void) {
       if (distance_mars > 0.0f) {
         distance_mars -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_mars));
-        if(distance_mars < 0.0f){
-          distance_mars = 0.0f;
+        if(distance_mars < 1.5f){
+          gl4dgDelete(mars);
         }
         
       }
@@ -383,11 +396,11 @@ static void draw(void) {
 
     gl4duPushMatrix(); {
     if (_timer && !_pause) {
-      if (distance_jupiter > 0.0f) {
+      if (distance_jupiter > 1.5f) {
         distance_jupiter -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_jupiter));
-        if(distance_jupiter < 0.0f){
-          distance_jupiter = 0.0f;
+        if(distance_jupiter < 1.5f){
+          gl4dgDelete(jupiter);
         }
         
       }
@@ -412,8 +425,10 @@ static void draw(void) {
       if (distance_saturne > 0.0f) {
         distance_saturne -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_saturne));
-        if(distance_saturne < 0.0f){
-          distance_saturne = 0.0f;
+        if(distance_saturne < 1.5f){
+          gl4dgDelete(saturne);
+          gl4dgDelete(anneau);
+
         }
         
       }
@@ -453,8 +468,8 @@ static void draw(void) {
         if (distance_uranus > 0.0f) {
           distance_uranus -= dt * delai;
           gl4duTranslatef(0.0f, 0.0f, -(distance_uranus));
-          if(distance_uranus < 0.0f){
-            distance_uranus = 0.0f;
+          if(distance_uranus < 1.5f){
+            gl4dgDelete(uranus);
           }
         
         }
@@ -484,8 +499,8 @@ static void draw(void) {
         if (distance_neptune > 0.0f) {
           distance_neptune -= dt * delai;
           gl4duTranslatef(0.0f, 0.0f, -(distance_neptune));
-          if(distance_neptune < 0.0f){
-            distance_neptune = 0.0f;
+          if(distance_neptune < 1.5f){
+            gl4dgDelete(neptune);
           }
         
         }
