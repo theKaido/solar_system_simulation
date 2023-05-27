@@ -15,7 +15,7 @@ CP = rsync -R
 # déclaration des options du compilateur
 CFLAGS = -Wall -O3
 CPPFLAGS = -I.
-LDFLAGS = -lm
+LDFLAGS = -lm -lSDL2_ttf
 
 # définition des fichiers et dossiers
 PROGNAME = systemeSolaire
@@ -25,7 +25,7 @@ HEADERS =
 SOURCES = window.c
 OBJ = $(SOURCES:.c=.o)
 DOXYFILE = documentation/Doxyfile
-EXTRAFILES = COPYING $(wildcard shaders/*.?s images/*.png) 
+EXTRAFILES = COPYING $(wildcard shaders/*.?s images/*.png) DejaVuSans-Bold.ttf
 DISTFILES = $(SOURCES) Makefile $(HEADERS) $(DOXYFILE) $(EXTRAFILES)
 
 # Traitement automatique (ne pas modifier)
@@ -50,7 +50,7 @@ else
 endif
 
 CPPFLAGS += $(shell sdl2-config --cflags)
-LDFLAGS  += -lGL4Dummies $(shell sdl2-config --libs) -lSDL2_image
+LDFLAGS  += -lGL4Dummies $(shell sdl2-config --libs) -lSDL2_image -lSDL2_ttf
 
 all: $(PROGNAME)
 
