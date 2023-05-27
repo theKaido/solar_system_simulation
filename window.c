@@ -9,11 +9,19 @@
 #include <GL4D/gl4df.h>
 #include <GL4D/gl4duw_SDL2.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
+#define R_MASK 0xff000000
+#define G_MASK 0x00ff0000
+#define B_MASK 0x0000ff00
+#define A_MASK 0x000000ff
+
 
 
 /* Prototypes des fonctions statiques contenues dans ce fichier C */
 static void init(void);
 static void loadTexture(GLuint id, const char * filename);
+static void initText(GLuint * ptId, const char * text);
+static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet);
 static void keyup(int keycode);
 static void keydown(int keycode);
 static void resize(int w, int h);
@@ -23,16 +31,19 @@ static void quit(void);
 /*!\brief dimensions de la fenêtre */
 static int _wW = 1000, _wH = 1000;
 /*!\brief identifiant du programme GLSL */
-static GLuint _pId = 0;
+static GLuint _pId = 0,_tId = 0;
 /*!\brief quelques objets géométriques */
-static GLuint soleil = 0, anneau = 0;
-static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0,etoile = 0;
-static GLuint ecran =0;
+static GLuint soleil = 0, anneau = 0,mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0;
+static GLuint ecran = 0,ecrancredit = 0;
 static GLuint textID[26] = {0};
 static GLuint _pause = 0;
 static GLuint _vue = 0;
 static GLuint _timer = 0;
 static GLuint _reset = 0;
+static GLuint _eclairmode = 0;
+static GLuint _credit = 0;
+static GLuint _textTexId = 0;
+
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
@@ -55,7 +66,7 @@ static void init(void) {
     glEnable(GL_CULL_FACE);
     
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    
+    _tId = gl4duCreateProgram("<vs>shaders/credits.vs", "<fs>shaders/credits.fs", NULL);
     _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
     gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
     gl4duGenMatrix(GL_FLOAT, "projectionMatrix");
@@ -69,9 +80,19 @@ static void init(void) {
     saturne = gl4dgGenSpheref(30, 30);
     uranus= gl4dgGenSpheref(30, 30);
     neptune = gl4dgGenSpheref(30, 30);
-    etoile = gl4dgGenSpheref(1,1);
     anneau = gl4dgGenTorusf(3000, 300, 0.1f);
     ecran = gl4dgGenQuadf();
+    ecrancredit = gl4dgGenQuadf();
+    initText(&_textTexId, 
+	   "Ceci est la simulation d'un systeme solaire fictif\n\n\n"
+     " Après avoir consonmé toutes ces ressources  , "
+	   " sa taille augmente"
+	   " Pour désactivé les éclairs appuyer sur la touche 'e' \n"
+	   " Pour Quitter le Crédit d'introduction appuyer sur 'c' afin de démarrer la simulation "
+	   " \n\n\n"
+	   " les sources sont sité dans le README.md"
+	   " Adopter différent point de vue , Merci "
+     " Créer par MATHANARUBAN Jonny");
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
     for (int i = 0;i<25; i++) {
@@ -134,6 +155,89 @@ static void loadTexture(GLuint id, const char * filename) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   }
 }
+static void initText(GLuint * ptId, const char * text) {
+  static int firstTime = 1;
+  SDL_Color c = {255, 255, 0, 255};
+  SDL_Surface * d, * s;
+  TTF_Font * font = NULL;
+  if(firstTime) {
+    /* initialisation de la bibliothèque SDL2 ttf */
+    if(TTF_Init() == -1) {
+      fprintf(stderr, "TTF_Init: %s\n", TTF_GetError());
+      exit(2);
+    }
+    firstTime = 0;
+  }
+  if(*ptId == 0) {
+    /* initialisation de la texture côté OpenGL */
+    glGenTextures(1, ptId);
+    glBindTexture(GL_TEXTURE_2D, *ptId);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+  /* chargement de la font */
+  if( !(font = TTF_OpenFont("DejaVuSans-Bold.ttf", 128)) ) {
+    fprintf(stderr, "TTF_OpenFont: %s\n", TTF_GetError());
+    return;
+  }
+  /* création d'une surface SDL avec le texte */
+  d = TTF_RenderUTF8_Blended_Wrapped(font, text, c, 2048);
+  if(d == NULL) {
+    TTF_CloseFont(font);
+    fprintf(stderr, "Erreur lors du TTF_RenderText\n");
+    return;
+  }
+  /* copie de la surface SDL vers une seconde aux spécifications qui correspondent au format OpenGL */
+  s = SDL_CreateRGBSurface(0, d->w, d->h, 32, R_MASK, G_MASK, B_MASK, A_MASK);
+  assert(s);
+  SDL_BlitSurface(d, NULL, s, NULL);
+  SDL_FreeSurface(d);
+  /* transfert vers la texture OpenGL */
+  glBindTexture(GL_TEXTURE_2D, *ptId);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
+  fprintf(stderr, "Dimensions de la texture : %d %d\n", s->w, s->h);
+  SDL_FreeSurface(s);
+  TTF_CloseFont(font);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet) {
+  const GLfloat inclinaison = -60.0;
+  static GLfloat t0 = -1;
+  GLfloat t, d;
+
+  if(t0 < 0.0f)
+    t0 = SDL_GetTicks();
+  t = (SDL_GetTicks() - t0) / 1000.0f;
+  d = -2.4f /* du retard pour commencer en bas */ + 0.15f /* vitesse */ * t;
+
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glUseProgram(_tId);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, _textTexId);
+
+  glUniform1i(glGetUniformLocation(_tId, "inv"), 1);
+  glUniform1i(glGetUniformLocation(_tId, "tex"), 0);
+
+  gl4duBindMatrix("modelViewMatrix");
+  gl4duLoadIdentityf();
+
+  gl4duScalef(1, 2, 1);
+  gl4duTranslatef(0.2f, d * cos(inclinaison * M_PI / 180.0f), -2 + d * sin(inclinaison * M_PI / 180.0f));
+  gl4duRotatef(inclinaison, 1, 0, 0);
+
+  gl4duSendMatrices();
+  gl4dgDraw(objet);
+
+  glUseProgram(0);
+}
 
 
 /*!\brief Cette fonction paramétre la vue (viewport) OpenGL en
@@ -160,7 +264,14 @@ static void keydown(int keycode) {
   switch(keycode) {
     case 'a' :
           _timer = !_timer;
+          _eclairmode = !_eclairmode;
           break;
+    case 'e' :
+          _eclairmode = !_eclairmode;
+          break;
+    case 'c':
+        _credit = !_credit;
+        break;
     case 'm' :
       _vue = (_vue +1)%2;
       break;
@@ -186,11 +297,14 @@ static void keydown(int keycode) {
 }
 /*!\brief dessine dans le contexte OpenGL actif. */
 static void draw(void) {
-
+  if (_credit && !_pause) {
+    drawTextCreditdebut(_tId,_textTexId,ecrancredit);
+  }else {
+  
     static GLfloat a = 0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     static Uint32 t0 = 0 ,t;
-    GLfloat dt = 0.0,delai = 0.5f,delai_sun = 0.02f;
+    GLfloat dt = 0.0,delai = 0.9f,delai_sun = 0.02f;
     dt = ((t = SDL_GetTicks()) - t0) / 1000.0;
     t0 = t;
     gl4duBindMatrix("modelViewMatrix");
@@ -214,14 +328,14 @@ static void draw(void) {
 
 
     /*Vitesse en orbite des planetes */
-    float vit_mercure = 0.04f;
-    float vit_venus = 0.02f; 
-    float vit_terre = 0.01f; 
-    float vit_mars = 0.008f; 
-    float vit_jupiter = 0.005f;
-    float vit_saturne = 0.003f;
-    float vit_uranus = 0.002f;
-    float vit_neptune = 0.0015f;
+    static float vit_mercure = 0.04f;
+    static float vit_venus = 0.02f; 
+    static float vit_terre = 0.01f; 
+    static float vit_mars = 0.008f; 
+    static float vit_jupiter = 0.005f;
+    static float vit_saturne = 0.003f;
+    static float vit_uranus = 0.002f;
+    static float vit_neptune = 0.0015f;
 
     /*Inclinaison des planetes par rapport à leur rotation */
     float inclinaison_mercure = 7.005f;
@@ -293,10 +407,6 @@ static void draw(void) {
     
     } gl4duPopMatrix();
     if (taille_sun == taille_min && _timer) {
-      glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_2D, textID[24]);
-      glUniform1i(glGetUniformLocation(_pId, "tex2"), 2);
-
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, textID[23]);
       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
@@ -305,6 +415,8 @@ static void draw(void) {
       glBindTexture(GL_TEXTURE_2D,textID[11]); 
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+
+      a +=5.0f;
 
     }else {
       glActiveTexture(GL_TEXTURE1);
@@ -317,7 +429,16 @@ static void draw(void) {
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
   
     }
-    
+      if (_eclairmode) {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textID[24]);
+        glUniform1i(glGetUniformLocation(_pId, "tex2"), 2);
+      }else{
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textID[10]);
+        glUniform1i(glGetUniformLocation(_pId, "tex2"), 2);
+      }
+
     gl4dgDraw(soleil);
    
     
@@ -330,9 +451,7 @@ static void draw(void) {
       if (_timer && !_pause) {
         if (distance_mercure > 0.0f) {
           distance_mercure -= dt * delai;
-          gl4duTranslatef(0.0f, 0.0f, -(distance_mercure));
-          if (distance_mercure < 7.0f)
-            vit_mercure = vit_mercure *10000.0f;         
+          gl4duTranslatef(0.0f, 0.0f, -(distance_mercure));        
           if(distance_mercure < 1.5f){
             gl4dgDelete(mercure);
           }
@@ -623,6 +742,7 @@ static void draw(void) {
         a += 5.1f;
   #endif
 
+  }
 }
 /*!\brief appelée au moment de sortir du programme (atexit), libère les éléments utilisés */
 static void quit(void) {
