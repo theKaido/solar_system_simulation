@@ -3,6 +3,7 @@
  * \author Farès BELHADJ, amsi@ai.univ-paris8.fr
  * \date April 15 2016 */
 #include <GL4D/gl4dg.h>
+#include <assert.h>
 #include <stdio.h>
 #include <GL4D/gl4du.h>
 #include <GL4D/gl4df.h>
@@ -27,7 +28,7 @@ static GLuint _pId = 0;
 static GLuint soleil = 0, anneau = 0;
 static GLuint mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0,etoile = 0;
 static GLuint ecran =0;
-static GLuint textID[13] = {0};
+static GLuint textID[25] = {0};
 static GLuint _pause = 0;
 static GLuint _vue = 0;
 static GLuint _timer = 0;
@@ -73,8 +74,11 @@ static void init(void) {
     ecran = gl4dgGenQuadf();
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
-    assert(textID[0] && textID[1] && textID[2] && textID[3] &&textID[4] && textID[5] && textID[6] && textID[7] && textID[8] && textID[9] && textID[10] && textID[11]);
+    for (int i = 0;i<24; i++) {
+      assert(textID[i]);
+    }
 
+    //texture général 
     loadTexture(textID[0], "images/soleil.jpg");
     loadTexture(textID[1], "images/mercure.jpg");
     loadTexture(textID[2], "images/venus.jpg");
@@ -87,8 +91,23 @@ static void init(void) {
     loadTexture(textID[9],"images/saturnring.jpg" );
     loadTexture(textID[10], "images/espace.jpg");
     loadTexture(textID[11],"images/trou_noir.jpg");
+
+    //texture pour la normal map
+    loadTexture(textID[12],"images/soleil_normal.jpg");
+    loadTexture(textID[13], "images/mercure_normal.jpg");
+    loadTexture(textID[14], "images/venus_normal.jpg");
+    loadTexture(textID[15], "images/terre_normal.jpg");
+    loadTexture(textID[16], "images/mars_normal.jpg");
+    loadTexture(textID[17], "images/jupiter_normal.jpg");
+    loadTexture(textID[18], "images/saturne_normal.jpg");
+    loadTexture(textID[19], "images/uranus_normal.jpg");
+    loadTexture(textID[20], "images/neptune_normal.jpg");
+    loadTexture(textID[21],"images/saturnring_normal.jpg" );
+    loadTexture(textID[22], "images/espace_normal.jpg");
+    loadTexture(textID[23],"images/trou_noir_normal.jpg");
+   
     
-    glBindTexture(GL_TEXTURE_2D, textID[12]);
+    glBindTexture(GL_TEXTURE_2D, textID[24]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -209,7 +228,8 @@ static void draw(void) {
     float inclinaison_saturne = 26.73f;
     float inclinaison_uranus = 97.86f;
     float inclinaison_neptune = 28.32f;
-    
+
+
     /*Placement des backgrounds pour l'effet espace le premier dans l'axe y*/
     gl4duPushMatrix();{
       gl4duTranslatef(0, 0.0, -100.0);
@@ -217,8 +237,13 @@ static void draw(void) {
       gl4duRotatef(a*0.05f, 0, 0, 1);
       gl4duScalef(100.0f,100.0f,100.0f);
       gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[22]);
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, textID[10]);
+      glBindTexture(GL_TEXTURE_2D,textID[10]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(ecran);
     }gl4duPopMatrix();
     
@@ -263,10 +288,23 @@ static void draw(void) {
     
     } gl4duPopMatrix();
     if (taille_sun == taille_min && _timer) {
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[23]);
+      glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D,textID[11]);
-    }else {
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
 
-      glBindTexture(GL_TEXTURE_2D, textID[0]);
+    }else {
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[12]);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D,textID[0]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+  
     }
     
     gl4dgDraw(soleil);
@@ -282,6 +320,8 @@ static void draw(void) {
         if (distance_mercure > 0.0f) {
           distance_mercure -= dt * delai;
           gl4duTranslatef(0.0f, 0.0f, -(distance_mercure));
+          if (distance_mercure < 7.0f)
+            vit_mercure = vit_mercure *10000.0f;         
           if(distance_mercure < 1.5f){
             gl4dgDelete(mercure);
           }
@@ -294,7 +334,13 @@ static void draw(void) {
         gl4duRotatef(a,0.0f,0.58f,0.0f);
         gl4duScalef(0.4f, 0.4f, 0.4f);
         gl4duSendMatrices();
-        glBindTexture(GL_TEXTURE_2D, textID[1]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textID[13]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D,textID[1]);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(mercure);
 
     }gl4duPopMatrix();
@@ -322,7 +368,13 @@ static void draw(void) {
       gl4duRotatef(a,0.0f,0.243f,0.0f);
       gl4duScalef(0.7f, 0.7f, 0.7f);
       gl4duSendMatrices();
-      glBindTexture(GL_TEXTURE_2D, textID[2]);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[14]);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D,textID[2]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(venus);
 
     }gl4duPopMatrix();
@@ -351,7 +403,13 @@ static void draw(void) {
       gl4duRotatef(a,0.0f,1.0f,0.0f);
       gl4duScalef(0.7f, 0.7f, 0.7f);
       gl4duSendMatrices();
-      glBindTexture(GL_TEXTURE_2D, textID[3]);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[15]);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D,textID[3]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(terre);
 
     } gl4duPopMatrix();
@@ -381,7 +439,13 @@ static void draw(void) {
         gl4duRotatef(a,0.0f,1.025f,0.0f);
         gl4duScalef(0.5f, 0.5f, 0.5f);
         gl4duSendMatrices();
-        glBindTexture(GL_TEXTURE_2D, textID[4]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textID[16]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D,textID[4]);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(mars);
 
     } gl4duPopMatrix();
@@ -408,7 +472,13 @@ static void draw(void) {
         gl4duRotatef(a,0.0f,4.125f,0.0f);
         gl4duScalef(1.7f, 1.7f, 1.7f);
         gl4duSendMatrices();
-        glBindTexture(GL_TEXTURE_2D, textID[5]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textID[17]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D,textID[5]);
+        glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+        glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+        glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
         gl4dgDraw(jupiter);
 
     } gl4duPopMatrix();
@@ -436,8 +506,13 @@ static void draw(void) {
       gl4duRotatef(a,0.0f,4.458f,0.0f);
       gl4duScalef(1.4f, 1.4f, 1.4f);
       gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[18]);
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, textID[6]);
+      glBindTexture(GL_TEXTURE_2D,textID[6]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(saturne);
     
     gl4duPushMatrix();
@@ -446,8 +521,13 @@ static void draw(void) {
       gl4duTranslatef(0.0f, 0.0f, 0.0f);   // Placez l'anneau devant Saturne
       gl4duScalef(1.9f, 0.2f, 1.9f);
       gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[21]);
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, textID[9]);
+      glBindTexture(GL_TEXTURE_2D,textID[9]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(anneau);
     }
     gl4duPopMatrix();
@@ -480,8 +560,13 @@ static void draw(void) {
 
       gl4duScalef(1.0f, 1.0f, 1.0f);
       gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[19]);
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, textID[7]);
+      glBindTexture(GL_TEXTURE_2D,textID[7]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(uranus);
 
   } gl4duPopMatrix();
@@ -508,8 +593,13 @@ static void draw(void) {
       gl4duRotatef(a,0.0f,6.708f,0.0f);
       gl4duScalef(1.0f, 1.0f, 1.0f);
       gl4duSendMatrices();
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[20]);
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, textID[8]);
+      glBindTexture(GL_TEXTURE_2D,textID[8]);
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(neptune);
 
   } gl4duPopMatrix();
@@ -524,9 +614,11 @@ static void draw(void) {
 }
 /*!\brief appelée au moment de sortir du programme (atexit), libère les éléments utilisés */
 static void quit(void) {
-  if(textID[0]) {
-    glDeleteTextures(sizeof textID / sizeof *textID, textID);
-    textID[0] = 0;
+  for (int i = 0;i < 25;++i) {
+    if(textID[i]) {
+      glDeleteTextures(sizeof textID / sizeof *textID, textID);
+      textID[i] = 0;
+    }
   }
   gl4duClean(GL4DU_ALL);
 }
