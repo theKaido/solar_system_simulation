@@ -36,9 +36,9 @@ void main(void) {
     // Combinaison des couleurs éclairées avec la deuxième texture
     vec4 tex_color = texture(tex2, vsoTexCoord); // récupération de la couleur de la deuxième texture
     vec4 mixed_color = (color1 + color2 + color3)/3.0; // moyenne des couleurs éclairées
-    vec4 final_color = mix(mixed_color, tex_color, 0.1); // mélange linéaire à 50-50 des deux couleurs
+    vec4 final_color = mix(mixed_color, tex_color, 0.15); // mélange linéaire à 50-50 des deux couleurs
 
-    final_color *= 2.0;
+    final_color *= 1.5;
 
     fragColor = final_color;
 
