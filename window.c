@@ -2,6 +2,7 @@
  * \brief géométries lumière diffuse et transformations de base en GL4Dummies
  * \author Farès BELHADJ, amsi@ai.univ-paris8.fr
  * \date April 15 2016 */
+#include "SDL2/SDL_mixer.h"
 #include <GL4D/gl4dg.h>
 #include <assert.h>
 #include <stdio.h>
@@ -10,6 +11,7 @@
 #include <GL4D/gl4duw_SDL2.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 //Definition des mask car non detecté dans le fichier 
 #define R_MASK 0xff000000
@@ -19,11 +21,14 @@
 
 
 
+
+
 /* Prototypes des fonctions statiques contenues dans ce fichier C */
 static void init(void);
 static void loadTexture(GLuint id, const char * filename);
 static void initText(GLuint * ptId, const char * text);
 static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet);
+static void ahInitAudio(const char * file);
 static void keyup(int keycode);
 static void keydown(int keycode);
 static void resize(int w, int h);
@@ -45,6 +50,7 @@ static GLuint _reset = 0;
 static GLuint _eclairmode = 0;
 static GLuint _credit = 0;
 static GLuint _textTexId = 0;
+static Mix_Music * _mmusic = NULL;
 
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
@@ -85,19 +91,26 @@ static void init(void) {
     anneau = gl4dgGenTorusf(3000, 300, 0.1f);
     ecran = gl4dgGenQuadf();
     ecrancredit = gl4dgGenQuadf();
-    initText(&_textTexId,
-    " Ceci était la création d'un trou noir au mileu\n "
-    " du systèmme solaire , les distances par rapport au "
-    " soleil sont fictifs .\n\n\n "
-    " En effet lorsque le soleil consomme toutes ces ressources "
-    " il devient  une géante rouge qui augmente dans un temps "
-    " puis rétrecit dans un autre pour former un trou noir\n\n\n "
-    " Ce programme a pour but de simuler ce phénomène \n "
+    initText(&_textTexId, " Ceci était la création \n" 
+    "d'un trou noir au milieu\n "
+    "du système solaire , les\n " 
+    " distances par rapport au\n "
+    " soleil sont fictives .\n\n\n "
+    " En effet lorsque le soleil\n "
+    " consomme toutes ses ressources\n "
+    " il devient une géante rouge\n "
+    " qui augmente dans un temps\n "
+    " puis rétrecit dans un autre\n " 
+    " pour former un trou noir\n\n\n "
+    " Ce programme a pour but de\n " 
+    " simuler ce phénomène \n "
     " \n\n\n"
     " Merci \n\n"
     " Créer par MATHANARUBAN Jonny\n\n\n\n"
-    " Pour quitter le programme appuyer sur la touche\n"
-    " 'q' ");
+    " Pour quitter le programme appuyer\n"
+    " sur la touche\n 'q' ");
+    
+    ahInitAudio("musique/Silences.mp3");
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
     for (int i = 0;i<27; i++) {
@@ -147,6 +160,25 @@ static void init(void) {
 
 
 }
+void ahInitAudio(const char * file) {
+  int mixFlags = MIX_INIT_OGG | MIX_INIT_MP3, res;
+  res = Mix_Init(mixFlags);
+  if( (res & mixFlags) != mixFlags ) {
+    fprintf(stderr, "Mix_Init: Erreur lors de l'initialisation de la bibliotheque SDL_Mixer\n");
+    fprintf(stderr, "Mix_Init: %s\n", Mix_GetError());
+    exit(-3);
+  }
+  if(Mix_OpenAudio(44100, AUDIO_S16LSB, 2, 1024) < 0)
+    exit(-4);
+  if(!(_mmusic = Mix_LoadMUS(file))) {
+    fprintf(stderr, "Erreur lors du Mix_LoadMUS: %s\n", Mix_GetError());
+    exit(-5);
+  }
+  if(!Mix_PlayingMusic())
+    Mix_PlayMusic(_mmusic, 1);
+}
+
+
 
 static void loadTexture(GLuint id, const char * filename) {
   SDL_Surface * t;
