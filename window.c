@@ -84,14 +84,22 @@ static void init(void) {
     ecran = gl4dgGenQuadf();
     ecrancredit = gl4dgGenQuadf();
     initText(&_textTexId, 
-	   "Ceci est la simulation d'un systeme solaire fictif\n\n\n"
-     " Après avoir consonmé toutes ces ressources  , "
-	   " sa taille augmente"
-	   " Pour désactivé les éclairs appuyer sur la touche 'e' \n"
-	   " Pour Quitter le Crédit d'introduction appuyer sur 'c' afin de démarrer la simulation "
+	   "Ceci est la simulation d'un système solaire fictif\n\n\n"
+     " Après avoir consonmé toutes ces ressources,\n "
+	   " sa taille augmente et diminue,\n "
+     " les astres de grandes tailles se transforment\n "
+     " en trou noir qui attirent et engloutissent \n"
+     " les planètes qui ont le malheur de graviter,"
+     " autour de lui \n\n\n\n"
+     " Ce Programme est la simulation de ce phénomène\n"
+     " "
+	   " Pour commencer retenez les informations \n"
+     " listées ci-dessous\n\n"
+	   " Pour Quitter le Crédit d'introduction appuyer sur 'c'" 
+     " afin de démarrer la simulation "
 	   " \n\n\n"
-	   " les sources sont sité dans le README.md"
-	   " Adopter différent point de vue , Merci "
+	   " les sources sont citées dans le README.md"
+	   " Merci "
      " Créer par MATHANARUBAN Jonny");
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
@@ -210,7 +218,7 @@ static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet) {
   if(t0 < 0.0f)
     t0 = SDL_GetTicks();
   t = (SDL_GetTicks() - t0) / 1000.0f;
-  d = -2.4f /* du retard pour commencer en bas */ + 0.15f /* vitesse */ * t;
+  d = -2.4f /* du retard pour commencer en bas */ + 0.1f /* vitesse */ * t;
 
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
