@@ -10,6 +10,8 @@
 #include <GL4D/gl4duw_SDL2.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+
+//Definition des mask car non detecté dans le fichier 
 #define R_MASK 0xff000000
 #define G_MASK 0x00ff0000
 #define B_MASK 0x0000ff00
@@ -35,7 +37,7 @@ static GLuint _pId = 0,_tId = 0;
 /*!\brief quelques objets géométriques */
 static GLuint soleil = 0, anneau = 0,mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0;
 static GLuint ecran = 0,ecrancredit = 0;
-static GLuint textID[26] = {0};
+static GLuint textID[28] = {0};
 static GLuint _pause = 0;
 static GLuint _vue = 0;
 static GLuint _timer = 0;
@@ -83,28 +85,22 @@ static void init(void) {
     anneau = gl4dgGenTorusf(3000, 300, 0.1f);
     ecran = gl4dgGenQuadf();
     ecrancredit = gl4dgGenQuadf();
-    initText(&_textTexId, 
-	   "Ceci est la simulation " 
-     " d'un système solaire fictif\n\n\n"
-     " Après avoir consommé toutes ses ressources,\n "
-	   " sa taille augmente et diminue,\n "
-     " les astres de grandes tailles se transforment\n "
-     " en trou noir qui attirent et engloutissent \n"
-     " les planètes qui ont le malheur de graviter,"
-     " autour de lui \n\n\n\n"
-     " Ce Programme est la simulation de ce phénomène\n"
-     " "
-	   " Pour commencer retenez les informations \n"
-     " listées ci-dessous\n\n"
-	   " Pour Quitter le Crédit d'introduction appuyer sur 'c'" 
-     " afin de démarrer la simulation "
-	   " \n\n\n"
-	   " les sources sont citées dans le README.md"
-	   " Merci "
-     " Créer par MATHANARUBAN Jonny");
+    initText(&_textTexId,
+    " Ceci était la création d'un trou noir au mileu\n "
+    " du systèmme solaire , les distances par rapport au "
+    " soleil sont fictifs .\n\n\n "
+    " En effet lorsque le soleil consomme toutes ces ressources "
+    " il devient  une géante rouge qui augmente dans un temps "
+    " puis rétrecit dans un autre pour former un trou noir\n\n\n "
+    " Ce programme a pour but de simuler ce phénomène \n "
+    " \n\n\n"
+    " Merci \n\n"
+    " Créer par MATHANARUBAN Jonny\n\n\n\n"
+    " Pour quitter le programme appuyer sur la touche\n"
+    " 'q' ");
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
-    for (int i = 0;i<25; i++) {
+    for (int i = 0;i<27; i++) {
       assert(textID[i]);
     }
 
@@ -121,9 +117,10 @@ static void init(void) {
     loadTexture(textID[9],"images/saturnring.jpg" );
     loadTexture(textID[10], "images/espace.jpg");
     loadTexture(textID[11],"images/trou_noir.jpg");
+    loadTexture(textID[25],"images/soleilrouge.jpg");
 
     //texture pour la normal map
-    loadTexture(textID[12],"images/soleil_normal.jpg");
+    loadTexture(textID[12], "images/soleil_normal.jpg");
     loadTexture(textID[13], "images/mercure_normal.jpg");
     loadTexture(textID[14], "images/venus_normal.jpg");
     loadTexture(textID[15], "images/terre_normal.jpg");
@@ -132,16 +129,17 @@ static void init(void) {
     loadTexture(textID[18], "images/saturne_normal.jpg");
     loadTexture(textID[19], "images/uranus_normal.jpg");
     loadTexture(textID[20], "images/neptune_normal.jpg");
-    loadTexture(textID[21],"images/saturnring_normal.jpg" );
+    loadTexture(textID[21], "images/saturnring_normal.jpg" );
     loadTexture(textID[22], "images/espace_normal.jpg");
-    loadTexture(textID[23],"images/trou_noir_normal.jpg");
+    loadTexture(textID[23], "images/trou_noir_normal.jpg");
+    loadTexture(textID[26], "images/soleilrouge_normal.jpg");
 
     //texture mouvement
     loadTexture(textID[24],"images/element.jpg");
 
    
     
-    glBindTexture(GL_TEXTURE_2D, textID[25]);
+    glBindTexture(GL_TEXTURE_2D, textID[27]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -219,7 +217,7 @@ static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet) {
   if(t0 < 0.0f)
     t0 = SDL_GetTicks();
   t = (SDL_GetTicks() - t0) / 1000.0f;
-  d = -2.4f /* du retard pour commencer en bas */ + 0.1f /* vitesse */ * t;
+  d = -1.4f /* du retard pour commencer en bas */ + 0.1f /* vitesse */ * t;
 
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -415,7 +413,17 @@ static void draw(void) {
       gl4duSendMatrices();
     
     } gl4duPopMatrix();
-    if (taille_sun == taille_min && _timer) {
+    if (taille_sun > taille_min && _timer) {
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textID[26]);
+      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
+      
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D,textID[25]); 
+      glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
+      glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
+    }
+     else if (taille_sun == taille_min && _timer) {
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, textID[23]);
       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
@@ -425,7 +433,6 @@ static void draw(void) {
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
 
-      a +=5.0f;
 
     }else {
       glActiveTexture(GL_TEXTURE1);
@@ -722,8 +729,8 @@ static void draw(void) {
           gl4duTranslatef(0.0f, 0.0f, -(distance_neptune));
           if(distance_neptune < 1.5f){
             gl4dgDelete(neptune);
+            _credit = !_credit;
           }
-        
         }
     }
     else {
