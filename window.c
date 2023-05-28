@@ -84,8 +84,9 @@ static void init(void) {
     ecran = gl4dgGenQuadf();
     ecrancredit = gl4dgGenQuadf();
     initText(&_textTexId, 
-	   "Ceci est la simulation d'un système solaire fictif\n\n\n"
-     " Après avoir consonmé toutes ces ressources,\n "
+	   "Ceci est la simulation " 
+     " d'un système solaire fictif\n\n\n"
+     " Après avoir consommé toutes ses ressources,\n "
 	   " sa taille augmente et diminue,\n "
      " les astres de grandes tailles se transforment\n "
      " en trou noir qui attirent et engloutissent \n"
