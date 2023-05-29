@@ -169,6 +169,9 @@ static void init(void) {
 
 
 }
+
+
+
 void ahInitAudio(const char * file) {
   int mixFlags = MIX_INIT_OGG | MIX_INIT_MP3, res;
   res = Mix_Init(mixFlags);
@@ -363,7 +366,7 @@ static void keydown(int keycode) {
 
 /*!\brief dessine dans le contexte OpenGL actif. */
 static void draw(void) {
-  if (_credit && !_pause) {
+  if (_credit) {
     drawTextCreditdebut(_tId,_textTexId,ecrancredit);
   }else {
   
@@ -441,6 +444,11 @@ static void draw(void) {
       gl4duLookAtf(0.0f, yvue, zvue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
     else
       gl4duLookAtf(0.0f, 70.0f, 0.0f,0.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+
+
+    /*if (distance_terre < 2.5f) {
+      _vue = !_vue;
+    }*/
 
 
     static float facteur_agrandir = 1.1f;
@@ -597,8 +605,9 @@ static void draw(void) {
       if (distance_terre > 0.0f) {
         distance_terre -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_terre));
+
         if(distance_terre < 1.5f){
-          gl4dgDelete(terre);
+          gl4dgDelete(terre);  
         }
         
       }
@@ -634,6 +643,7 @@ static void draw(void) {
         gl4duTranslatef(0.0f, 0.0f, -(distance_mars));
         if(distance_mars < 1.5f){
           gl4dgDelete(mars);
+          
         }
         
       }
