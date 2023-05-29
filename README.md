@@ -40,7 +40,7 @@ ___________________________________________________________________________
         touche à appuyer :
 
             'a'      : active/désactive le trou noir.
-            'e'      : active/désactive le mode éclair.
+            'e'      : active le mode éclair.
             'c'      : affiche un crédit mais vaut mieux pas l'utilisé car détruit les translation.
             'm'      : change la position de la caméra .
             '↑↓→←'   : déplace la caméra.

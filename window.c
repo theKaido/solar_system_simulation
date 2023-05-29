@@ -440,10 +440,12 @@ static void draw(void) {
       yvue = 20.0f;
       _reset = !_reset;
     }
+    static GLfloat dezoomey = 70.0f;
+
     if(_vue == 0)
       gl4duLookAtf(0.0f, yvue, zvue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
     else
-      gl4duLookAtf(0.0f, 70.0f, 0.0f,0.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
+      gl4duLookAtf(0.0f, dezoomey, 0.0f,0.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
 
 
     /*if (distance_terre < 2.5f) {
@@ -461,7 +463,7 @@ static void draw(void) {
 
       gl4duTranslatef(0, 0, 0);
       gl4duRotatef(a, 0, 0.002f, 0);
-      if (_timer && !_pause) {
+      if (!_timer && !_pause) {
         if(grand == 0){
           if (taille_sun < taille_max) {
             taille_sun += (facteur_agrandir * delai_sun);
@@ -486,7 +488,7 @@ static void draw(void) {
       gl4duSendMatrices();
     
     } gl4duPopMatrix();
-    if (taille_sun > taille_min && _timer) {
+    if (taille_sun > taille_min && !_timer) {
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, textID[26]);//texture etoile rouge normal map
       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
@@ -496,7 +498,7 @@ static void draw(void) {
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
     }
-    else if (taille_sun == taille_min && _timer) {
+    else if (taille_sun == taille_min && !_timer) {
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, textID[23]);//texture trou noir normal map
       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
@@ -518,7 +520,7 @@ static void draw(void) {
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
   
     }
-    if (_eclairmode) {
+    if (!_eclairmode && taille_sun == taille_max) {
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, textID[24]);//texture superposé 
       glUniform1i(glGetUniformLocation(_pId, "tex2"), 2);
@@ -533,7 +535,7 @@ static void draw(void) {
 
     // Planète Mercure
     gl4duPushMatrix();{
-      if (_timer && !_pause) {
+      if (!_timer && !_pause) {
         if (distance_mercure > 0.0f) {
           distance_mercure -= dt * delai;
           gl4duTranslatef(0.0f, 0.0f, -(distance_mercure));        
@@ -566,7 +568,7 @@ static void draw(void) {
 
     // Planète Vénus
     gl4duPushMatrix();{
-    if (_timer && !_pause) {
+    if (!_timer && !_pause) {
       if (distance_venus > 0.0f) {
         distance_venus -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_venus));
@@ -601,13 +603,14 @@ static void draw(void) {
     
     // Planète Terre
     gl4duPushMatrix(); {
-    if (_timer && !_pause) {
+    if (!_timer && !_pause) {
       if (distance_terre > 0.0f) {
         distance_terre -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_terre));
 
         if(distance_terre < 1.5f){
-          gl4dgDelete(terre);  
+          gl4dgDelete(terre);
+          _vue = 1;  
         }
         
       }
@@ -637,12 +640,13 @@ static void draw(void) {
     
     // Planète Mars
     gl4duPushMatrix(); {
-    if (_timer && !_pause) {
+    if (!_timer && !_pause) {
       if (distance_mars > 0.0f) {
         distance_mars -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_mars));
         if(distance_mars < 1.5f){
           gl4dgDelete(mars);
+          
           
         }
         
@@ -673,12 +677,13 @@ static void draw(void) {
     gl4duSendMatrices();
 
     gl4duPushMatrix(); {
-    if (_timer && !_pause) {
+    if (!_timer && !_pause) {
       if (distance_jupiter > 1.5f) {
         distance_jupiter -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_jupiter));
         if(distance_jupiter < 1.5f){
           gl4dgDelete(jupiter);
+          
         }
         
       }
@@ -705,13 +710,14 @@ static void draw(void) {
     gl4duSendMatrices();
   //Planete Saturne
   gl4duPushMatrix();{
-    if (_timer && !_pause) {
+    if (!_timer && !_pause) {
       if (distance_saturne > 0.0f) {
         distance_saturne -= dt * delai;
         gl4duTranslatef(0.0f, 0.0f, -(distance_saturne));
         if(distance_saturne < 1.5f){
           gl4dgDelete(saturne);
           gl4dgDelete(anneau);
+          
 
         }
         
@@ -758,12 +764,13 @@ static void draw(void) {
 
   //Planete Uranus
   gl4duPushMatrix(); {
-    if (_timer && !_pause) {
+    if (!_timer && !_pause) {
         if (distance_uranus > 0.0f) {
           distance_uranus -= dt * delai;
           gl4duTranslatef(0.0f, 0.0f, -(distance_uranus));
           if(distance_uranus < 1.5f){
             gl4dgDelete(uranus);
+            dezoomey += 0.55f;
           }
         
         }
@@ -794,7 +801,7 @@ static void draw(void) {
 
     //Planete Neptune
   gl4duPushMatrix(); {
-    if (_timer && !_pause) {
+    if (!_timer && !_pause) {
         if (distance_neptune > 0.0f) {
           distance_neptune -= dt * delai;
           gl4duTranslatef(0.0f, 0.0f, -(distance_neptune));
