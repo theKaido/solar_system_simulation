@@ -19,7 +19,7 @@ LDFLAGS = -lm -lSDL2_ttf -lSDL2_mixer
 
 # définition des fichiers et dossiers
 PROGNAME = systemeSolaire
-VERSION = 2.0
+VERSION = finalbyJonnyMathanaruban
 distdir = $(PROGNAME)-$(VERSION)
 HEADERS = 
 SOURCES = window.c
