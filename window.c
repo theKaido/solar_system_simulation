@@ -1,8 +1,8 @@
 /*!\file window.c
- * \brief géométries lumière diffuse et transformations de base en GL4Dummies
- * \author Farès BELHADJ, amsi@ai.univ-paris8.fr
- * \date April 15 2016 */
-#include "SDL2/SDL_mixer.h"
+ * \brief syteme solaire avec différent option (credit,déplacement,texture ) en GL4Dummies
+ * \author MATHANARUBAN Jonny, jonnymthdev@gmail.com
+ * \date May 29 2023 */
+
 #include <GL4D/gl4dg.h>
 #include <assert.h>
 #include <stdio.h>
@@ -29,12 +29,11 @@ static void loadTexture(GLuint id, const char * filename);
 static void initText(GLuint * ptId, const char * text);
 static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet);
 static void ahInitAudio(const char * file);
-static void keyup(int keycode);
 static void keydown(int keycode);
 static void resize(int w, int h);
 static void draw(void);
 static void quit(void);
-void ahStopAudio();
+
 
 
 /*!\brief dimensions de la fenêtre */
@@ -43,29 +42,24 @@ static int _wW = 1000, _wH = 1000;
 static GLuint _pId = 0,_tId = 0;
 /*!\brief quelques objets géométriques */
 static GLuint soleil = 0, anneau = 0,mercure = 0, venus = 0,terre = 0 ,mars = 0,jupiter = 0,saturne = 0, uranus= 0,neptune = 0;
-static GLuint ecran = 0,ecrancredit = 0;
+static GLuint ecran = 0,ecrancredit = 0,_textTexId = 0;
 static GLuint textID[28] = {0};
-static GLuint _pause = 0;
-static GLuint _vue = 0;
-static GLuint _timer = 0;
-static GLuint _reset = 0;
-static GLuint _eclairmode = 0;
-static GLuint _credit = 0;
-static GLuint _textTexId = 0;
+static GLuint _pause = 0,_vue = 0, _timer = 0,_reset = 0,_eclairmode = 0,_credit = 0;
+
+static GLfloat yvue = 20.0f;
+static GLfloat zvue = 60.0f;
 static Mix_Music * _mmusic = NULL;
 
-char* _currentMusic = NULL;
 
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
  * initialise GL et les données, affecte les fonctions d'événements et
  * lance la boucle principale d'affichage.*/
 int main(int argc, char ** argv) {
-  if(!gl4duwCreateWindow(argc, argv, "GL4Dummies", 0, 0, _wW, _wH, GL4DW_RESIZABLE | GL4DW_SHOWN))return 1;
+  if(!gl4duwCreateWindow(argc, argv, "Systeme Solaire", 0, 0, _wW, _wH, GL4DW_RESIZABLE | GL4DW_SHOWN))return 1;
   init();
   atexit(quit);
   gl4duwResizeFunc(resize);
-  gl4duwKeyUpFunc(keyup);
   gl4duwKeyDownFunc(keydown);
   gl4duwDisplayFunc(draw);
   gl4duwMainLoop();
@@ -74,29 +68,28 @@ int main(int argc, char ** argv) {
 /*!\brief initialise les paramètres OpenGL et les données */
 static void init(void) {
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
     
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    _tId = gl4duCreateProgram("<vs>shaders/credits.vs", "<fs>shaders/credits.fs", NULL);
-    _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
-    gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
-    gl4duGenMatrix(GL_FLOAT, "projectionMatrix");
-    resize(_wW, _wH);
-    soleil = gl4dgGenSpheref(30, 30);
-    mercure = gl4dgGenSpheref(30, 30);
-    venus = gl4dgGenSpheref(30, 30);
-    terre = gl4dgGenSpheref(30, 30);
-    mars = gl4dgGenSpheref(30, 30);
-    jupiter = gl4dgGenSpheref(30, 30);
-    saturne = gl4dgGenSpheref(30, 30);
-    uranus= gl4dgGenSpheref(30, 30);
-    neptune = gl4dgGenSpheref(30, 30);
-    anneau = gl4dgGenTorusf(3000, 300, 0.1f);
-    ecran = gl4dgGenQuadf();
-    ecrancredit = gl4dgGenQuadf();
-    initText(&_textTexId, 
-    " Ceci était la création \n" 
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  _tId = gl4duCreateProgram("<vs>shaders/credits.vs", "<fs>shaders/credits.fs", NULL);
+  _pId  = gl4duCreateProgram("<vs>shaders/dep3d.vs", "<fs>shaders/dep3d.fs", NULL);
+  gl4duGenMatrix(GL_FLOAT, "modelViewMatrix");
+  gl4duGenMatrix(GL_FLOAT, "projectionMatrix");
+  resize(_wW, _wH);
+  soleil = gl4dgGenSpheref(30, 30);
+  mercure = gl4dgGenSpheref(30, 30);
+  venus = gl4dgGenSpheref(30, 30);
+  terre = gl4dgGenSpheref(30, 30);
+  mars = gl4dgGenSpheref(30, 30);
+  jupiter = gl4dgGenSpheref(30, 30);
+  saturne = gl4dgGenSpheref(30, 30);
+  uranus= gl4dgGenSpheref(30, 30);
+  neptune = gl4dgGenSpheref(30, 30);
+  anneau = gl4dgGenTorusf(3000, 300, 0.1f);
+  ecran = gl4dgGenQuadf();
+  ecrancredit = gl4dgGenQuadf();
+  const char* text = "Ceci était la création \n"
     " d'un trou noir au milieu  "
     " du système solaire , dans ce "
     " programme la distance des "
@@ -115,66 +108,64 @@ static void init(void) {
     " Merci \n\n"
     " Créer par MATHANARUBAN Jonny\n\n\n\n"
     " Pour quitter le programme appuyer"
-    " sur la touche\n         'q' ");
+    " sur la touche 'q' ou Patienter ";
+  
+  initText(&_textTexId, text);
+  
     
     
     
 
-    glGenTextures(sizeof textID / sizeof * textID, textID);
-    for (int i = 0;i<27; i++) {
-      assert(textID[i]);
-    }
+  glGenTextures(sizeof textID / sizeof * textID, textID);
+  for (int i = 0;i<27; i++) {
+    assert(textID[i]);
+  }
 
-    //texture général 
-    loadTexture(textID[0], "images/soleil.jpg");
-    loadTexture(textID[1], "images/mercure.jpg");
-    loadTexture(textID[2], "images/venus.jpg");
-    loadTexture(textID[3], "images/terre.jpg");
-    loadTexture(textID[4], "images/mars.jpg");
-    loadTexture(textID[5], "images/jupiter.jpg");
-    loadTexture(textID[6], "images/saturne.jpg");
-    loadTexture(textID[7], "images/uranus.jpg");
-    loadTexture(textID[8], "images/neptune.jpg");
-    loadTexture(textID[9],"images/saturnring.jpg" );
-    loadTexture(textID[10], "images/espace.jpg");
-    loadTexture(textID[11],"images/trou_noir.jpg");
-    loadTexture(textID[25],"images/soleilrouge.jpg");
+  //texture général 
+  loadTexture(textID[0], "images/soleil.jpg");
+  loadTexture(textID[1], "images/mercure.jpg");
+  loadTexture(textID[2], "images/venus.jpg");
+  loadTexture(textID[3], "images/terre.jpg");
+  loadTexture(textID[4], "images/mars.jpg");
+  loadTexture(textID[5], "images/jupiter.jpg");
+  loadTexture(textID[6], "images/saturne.jpg");
+  loadTexture(textID[7], "images/uranus.jpg");
+  loadTexture(textID[8], "images/neptune.jpg");
+  loadTexture(textID[9],"images/saturnring.jpg" );
+  loadTexture(textID[10], "images/espace.jpg");
+  loadTexture(textID[11],"images/trou_noir.jpg");
+  loadTexture(textID[25],"images/soleilrouge.jpg");
 
-    //texture pour la normal map
-    loadTexture(textID[12], "images/soleil_normal.jpg");
-    loadTexture(textID[13], "images/mercure_normal.jpg");
-    loadTexture(textID[14], "images/venus_normal.jpg");
-    loadTexture(textID[15], "images/terre_normal.jpg");
-    loadTexture(textID[16], "images/mars_normal.jpg");
-    loadTexture(textID[17], "images/jupiter_normal.jpg");
-    loadTexture(textID[18], "images/saturne_normal.jpg");
-    loadTexture(textID[19], "images/uranus_normal.jpg");
-    loadTexture(textID[20], "images/neptune_normal.jpg");
-    loadTexture(textID[21], "images/saturnring_normal.jpg" );
-    loadTexture(textID[22], "images/espace_normal.jpg");
-    loadTexture(textID[23], "images/trou_noir_normal.jpg");
-    loadTexture(textID[26], "images/soleilrouge_normal.jpg");
+  //texture pour la normal map
+  loadTexture(textID[12], "images/soleil_normal.jpg");
+  loadTexture(textID[13], "images/mercure_normal.jpg");
+  loadTexture(textID[14], "images/venus_normal.jpg");
+  loadTexture(textID[15], "images/terre_normal.jpg");
+  loadTexture(textID[16], "images/mars_normal.jpg");
+  loadTexture(textID[17], "images/jupiter_normal.jpg");
+  loadTexture(textID[18], "images/saturne_normal.jpg");
+  loadTexture(textID[19], "images/uranus_normal.jpg");
+  loadTexture(textID[20], "images/neptune_normal.jpg");
+  loadTexture(textID[21], "images/saturnring_normal.jpg" );
+  loadTexture(textID[22], "images/espace_normal.jpg");
+  loadTexture(textID[23], "images/trou_noir_normal.jpg");
+  loadTexture(textID[26], "images/soleilrouge_normal.jpg");
 
-    //texture mouvement
-    loadTexture(textID[24],"images/element.jpg");
+  //texture mouvement
+  loadTexture(textID[24],"images/element.jpg");
 
    
     
-    glBindTexture(GL_TEXTURE_2D, textID[27]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, textID[27]);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  glEnable(GL_TEXTURE_2D);
 
-    //initialisation de mes deux musique 
-    if(!_timer) {
-     _currentMusic = "musique/Nomyn-Fragments.mp3"; // charge la première musique
-    } else {
-      ahStopAudio();
-     _currentMusic = "musique/Piratos _ www.wowa.me.mp3"; // charge la deuxième musique
-    }
+  //initialisation de la musique 
+
     
-    ahInitAudio(_currentMusic);
+  ahInitAudio("musique/Nomyn-Fragments.mp3");
 
 
 }
@@ -193,7 +184,7 @@ void ahInitAudio(const char * file) {
     exit(-5);
   }
   if(!Mix_PlayingMusic())
-    Mix_PlayMusic(_mmusic, 1);
+    Mix_PlayMusic(_mmusic, -1);
 }
 
 
@@ -212,6 +203,9 @@ static void loadTexture(GLuint id, const char * filename) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
   }
 }
+
+
+
 static void initText(GLuint * ptId, const char * text) {
   static int firstTime = 1;
   SDL_Color c = {255, 255, 0, 255};
@@ -294,6 +288,12 @@ static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet) {
   gl4dgDraw(objet);
 
   glUseProgram(0);
+
+  if (d >= 1.4f) {
+    gl4duClean(GL4DU_ALL);
+    exit(0);
+  
+  }
 }
 
 
@@ -310,58 +310,60 @@ static void resize(int w, int h) {
   gl4duBindMatrix("modelViewMatrix");
 }
 
-static void keyup(int keycode) {
-  switch(keycode) {
-  default:
-    break;
-  }
-}
 static void keydown(int keycode) {
   GLint v[2];
   switch(keycode) {
     case 'a' :
           _timer = !_timer;
           _eclairmode = !_eclairmode;
-          break;
+        break;
     case 'e' :
           _eclairmode = !_eclairmode;
-          break;
+        break;
     case 'c':
-        _credit = !_credit;
+          _credit = !_credit;
         break;
     case 'm' :
-      _vue = (_vue +1)%2;
-      break;
+          _vue = (_vue +1)%2;
+        break;
     case 'r' :
-      _reset = !_reset;
-      break;
+          _reset = !_reset;
+        break;
     case 'w':
-      glGetIntegerv(GL_POLYGON_MODE, v);
-      if(v[0] == GL_FILL)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      break;
+          glGetIntegerv(GL_POLYGON_MODE, v);
+          if(v[0] == GL_FILL)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+          else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        break;
     case ' ':
-      _pause = !_pause;
-      break;
+          _pause = !_pause;
+        break;
+    case SDLK_UP:
+          zvue -= 0.2f;
+        break;
+    case SDLK_DOWN:
+          zvue += 0.2f;
+        break;
+    case SDLK_RIGHT:
+          yvue +=0.2f;
+        break;
+    case SDLK_LEFT:
+          yvue -=0.2f;
+        break;  
     case 'q':
-      exit(0);
-      break;
+          exit(0);
+        break;
     default:
-      break;
+        break;
   }
 }
-void ahStopAudio() {
-  if(Mix_PlayingMusic())
-    Mix_HaltMusic();
-}
+
 
 
 /*!\brief dessine dans le contexte OpenGL actif. */
 static void draw(void) {
   if (_credit && !_pause) {
-    ahInitAudio("musique/Silences.mp3");
     drawTextCreditdebut(_tId,_textTexId,ecrancredit);
   }else {
   
@@ -416,23 +418,27 @@ static void draw(void) {
 
     /*Placement des backgrounds pour l'effet espace le premier dans l'axe y*/
     gl4duPushMatrix();{
-      gl4duTranslatef(0, 0.0, -100.0);
+      gl4duTranslatef(0, 0.0, -500.0);
       gl4duRotatef(0, 1, 0, 0);
       gl4duRotatef(a*0.05f, 0, 0, 1);
-      gl4duScalef(100.0f,100.0f,100.0f);
+      gl4duScalef(500.0f,500.0f,500.0f);
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, textID[22]);
+      glBindTexture(GL_TEXTURE_2D, textID[22]);//texture espace normal map
        glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D,textID[10]);
+      glBindTexture(GL_TEXTURE_2D,textID[10]);//texture espace
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(ecran);
     }gl4duPopMatrix();
-    
+    if (_reset) {
+      zvue = 60.0f;
+      yvue = 20.0f;
+      _reset = !_reset;
+    }
     if(_vue == 0)
-      gl4duLookAtf(0.0f, 20.0f, 60.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
+      gl4duLookAtf(0.0f, yvue, zvue, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f);//angle camera 
     else
       gl4duLookAtf(0.0f, 70.0f, 0.0f,0.0f, 0.0f, 0.0f,0.0f, 0.0f, -1.0f);
 
@@ -474,45 +480,41 @@ static void draw(void) {
     } gl4duPopMatrix();
     if (taille_sun > taille_min && _timer) {
       glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, textID[26]);
+      glBindTexture(GL_TEXTURE_2D, textID[26]);//texture etoile rouge normal map
       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
       
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D,textID[25]); 
+      glBindTexture(GL_TEXTURE_2D,textID[25]); //texture etoile rouge
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
     }
-     else if (taille_sun == taille_min && _timer) {
+    else if (taille_sun == taille_min && _timer) {
       glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, textID[23]);
+      glBindTexture(GL_TEXTURE_2D, textID[23]);//texture trou noir normal map
       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
       
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D,textID[11]); 
+      glBindTexture(GL_TEXTURE_2D,textID[11]);//textire trou noir  
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
 
 
     }else {
       glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, textID[12]);
+      glBindTexture(GL_TEXTURE_2D, textID[12]);//texture soleil normal map
       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
 
       glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D,textID[0]);
+      glBindTexture(GL_TEXTURE_2D,textID[0]);//texture soleil 
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
   
     }
-      if (_eclairmode) {
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, textID[24]);
-        glUniform1i(glGetUniformLocation(_pId, "tex2"), 2);
-      }else{
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, textID[10]);
-        glUniform1i(glGetUniformLocation(_pId, "tex2"), 2);
-      }
+    if (_eclairmode) {
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, textID[24]);//texture superposé 
+      glUniform1i(glGetUniformLocation(_pId, "tex2"), 2);
+    }
 
     gl4dgDraw(soleil);
    
@@ -788,7 +790,7 @@ static void draw(void) {
           gl4duTranslatef(0.0f, 0.0f, -(distance_neptune));
           if(distance_neptune < 1.5f){
             gl4dgDelete(neptune);
-            _credit = !_credit;
+            _credit = !_credit;// des que neptune disparait lancement du credit de fin 
           }
         }
     }
@@ -830,6 +832,10 @@ static void quit(void) {
   if (_mmusic != NULL) {
     Mix_FreeMusic(_mmusic);
     _mmusic = NULL;
+  }
+  if(_textTexId) {
+    glDeleteTextures(1, &_textTexId);
+    _textTexId = 0;
   }
   gl4duClean(GL4DU_ALL);
 }
