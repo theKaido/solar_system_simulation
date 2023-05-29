@@ -51,21 +51,19 @@ ___________________________________________________________________________
 
 ## Sources
 
-    Sources libre de droit : 
-------------------------------
-        Pour les textures de bases :
+    Pour les textures de bases :
 
-            "https://www.solarsystemscope.com/textures/" Pour les planètes
-            "https://i.pinimg.com/originals/0e/32/be/0e32be04f23e0533c43581ccf672f8ad.jpg" Pour le trou noir
-            "https://gms.gsfc.nasa.gov/vis/a030000/a030300/a030362/euvi_aia304_2012_carrington_print.jpg" Pour le soleil en fin de vie 
+        "https://www.solarsystemscope.com/textures/" Pour les planètes
+        "https://i.pinimg.com/originals/0e/32/be/0e32be04f23e0533c43581ccf672f8ad.jpg" Pour le trou noir
+        "https://gms.gsfc.nasa.gov/vis/a030000/a030300/a030362/euvi_aia304_2012_carrington_print.jpg" Pour le soleil en fin de vie 
 
-        Pour la musique :
+    Pour la musique :
 
-            "https://www.youtube.com/watch?v=ndyyIhwojys&ab_channel=AudioLibrary%E2%80%94Musicforcontentcreators"
+        "https://www.youtube.com/watch?v=ndyyIhwojys&ab_channel=AudioLibrary%E2%80%94Musicforcontentcreators"
 
-        Lien Git pour suivre l'évolution du projet :
+    Lien Git pour suivre l'évolution du projet :
 
-            "https://code.up8.edu/DjoMTH/systemesolaire"
+        "https://code.up8.edu/DjoMTH/systemesolaire"
 
 
 ## Autheur
