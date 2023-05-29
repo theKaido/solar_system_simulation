@@ -2,6 +2,7 @@
  * \brief géométries lumière diffuse et transformations de base en GL4Dummies
  * \author Farès BELHADJ, amsi@ai.univ-paris8.fr
  * \date April 15 2016 */
+#include "SDL2/SDL_mixer.h"
 #include <GL4D/gl4dg.h>
 #include <assert.h>
 #include <stdio.h>
@@ -10,6 +11,7 @@
 #include <GL4D/gl4duw_SDL2.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 //Definition des mask car non detecté dans le fichier 
 #define R_MASK 0xff000000
@@ -19,16 +21,21 @@
 
 
 
+
+
 /* Prototypes des fonctions statiques contenues dans ce fichier C */
 static void init(void);
 static void loadTexture(GLuint id, const char * filename);
 static void initText(GLuint * ptId, const char * text);
 static void drawTextCreditdebut(GLuint _tId, GLuint _textTexId,GLuint objet);
+static void ahInitAudio(const char * file);
 static void keyup(int keycode);
 static void keydown(int keycode);
 static void resize(int w, int h);
 static void draw(void);
 static void quit(void);
+void ahStopAudio();
+
 
 /*!\brief dimensions de la fenêtre */
 static int _wW = 1000, _wH = 1000;
@@ -45,6 +52,9 @@ static GLuint _reset = 0;
 static GLuint _eclairmode = 0;
 static GLuint _credit = 0;
 static GLuint _textTexId = 0;
+static Mix_Music * _mmusic = NULL;
+
+char* _currentMusic = NULL;
 
 
 /*!\brief La fonction principale créé la fenêtre d'affichage,
@@ -85,19 +95,30 @@ static void init(void) {
     anneau = gl4dgGenTorusf(3000, 300, 0.1f);
     ecran = gl4dgGenQuadf();
     ecrancredit = gl4dgGenQuadf();
-    initText(&_textTexId,
-    " Ceci était la création d'un trou noir au mileu\n "
-    " du systèmme solaire , les distances par rapport au "
-    " soleil sont fictifs .\n\n\n "
-    " En effet lorsque le soleil consomme toutes ces ressources "
-    " il devient  une géante rouge qui augmente dans un temps "
-    " puis rétrecit dans un autre pour former un trou noir\n\n\n "
-    " Ce programme a pour but de simuler ce phénomène \n "
+    initText(&_textTexId, 
+    " Ceci était la création \n" 
+    " d'un trou noir au milieu  "
+    " du système solaire , dans ce "
+    " programme la distance des "
+    " planètes sont à une échelle " 
+    " réduite par rapport au "
+    " soleil et sa taille aussi  .\n\n\n "
+    " En effet lorsque le soleil "
+    " consomme toutes ses ressources "
+    " il devient une géante rouge "
+    " qui augmente dans un temps "
+    " puis rétrecit dans un autre " 
+    " pour former un trou noir\n\n\n "
+    " Ce programme a pour but de " 
+    " reproduire ce phénomène  "
     " \n\n\n"
     " Merci \n\n"
     " Créer par MATHANARUBAN Jonny\n\n\n\n"
-    " Pour quitter le programme appuyer sur la touche\n"
-    " 'q' ");
+    " Pour quitter le programme appuyer"
+    " sur la touche\n         'q' ");
+    
+    
+    
 
     glGenTextures(sizeof textID / sizeof * textID, textID);
     for (int i = 0;i<27; i++) {
@@ -145,8 +166,37 @@ static void init(void) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _wW / 2, _wH, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glEnable(GL_TEXTURE_2D);
 
+    //initialisation de mes deux musique 
+    if(!_timer) {
+     _currentMusic = "musique/Nomyn-Fragments.mp3"; // charge la première musique
+    } else {
+      ahStopAudio();
+     _currentMusic = "musique/Piratos _ www.wowa.me.mp3"; // charge la deuxième musique
+    }
+    
+    ahInitAudio(_currentMusic);
+
 
 }
+void ahInitAudio(const char * file) {
+  int mixFlags = MIX_INIT_OGG | MIX_INIT_MP3, res;
+  res = Mix_Init(mixFlags);
+  if( (res & mixFlags) != mixFlags ) {
+    fprintf(stderr, "Mix_Init: Erreur lors de l'initialisation de la bibliotheque SDL_Mixer\n");
+    fprintf(stderr, "Mix_Init: %s\n", Mix_GetError());
+    exit(-3);
+  }
+  if(Mix_OpenAudio(44100, AUDIO_S16LSB, 2, 1024) < 0)
+    exit(-4);
+  if(!(_mmusic = Mix_LoadMUS(file))) {
+    fprintf(stderr, "Erreur lors du Mix_LoadMUS: %s\n", Mix_GetError());
+    exit(-5);
+  }
+  if(!Mix_PlayingMusic())
+    Mix_PlayMusic(_mmusic, 1);
+}
+
+
 
 static void loadTexture(GLuint id, const char * filename) {
   SDL_Surface * t;
@@ -302,9 +352,16 @@ static void keydown(int keycode) {
       break;
   }
 }
+void ahStopAudio() {
+  if(Mix_PlayingMusic())
+    Mix_HaltMusic();
+}
+
+
 /*!\brief dessine dans le contexte OpenGL actif. */
 static void draw(void) {
   if (_credit && !_pause) {
+    ahInitAudio("musique/Silences.mp3");
     drawTextCreditdebut(_tId,_textTexId,ecrancredit);
   }else {
   
@@ -353,6 +410,8 @@ static void draw(void) {
     float inclinaison_saturne = 26.73f;
     float inclinaison_uranus = 97.86f;
     float inclinaison_neptune = 28.32f;
+    
+
 
 
     /*Placement des backgrounds pour l'effet espace le premier dans l'axe y*/
@@ -364,10 +423,10 @@ static void draw(void) {
       gl4duSendMatrices();
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, textID[22]);
+       glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D,textID[10]);
       glUniform1i(glGetUniformLocation(_pId, "tex"), 0);
-      glUniform1i(glGetUniformLocation(_pId, "nm"), 1);
       glUniform1i(glGetUniformLocation(_pId, "use_nm"), 1);
       gl4dgDraw(ecran);
     }gl4duPopMatrix();
@@ -767,6 +826,10 @@ static void quit(void) {
       glDeleteTextures(sizeof textID / sizeof *textID, textID);
       textID[i] = 0;
     }
+  }
+  if (_mmusic != NULL) {
+    Mix_FreeMusic(_mmusic);
+    _mmusic = NULL;
   }
   gl4duClean(GL4DU_ALL);
 }
