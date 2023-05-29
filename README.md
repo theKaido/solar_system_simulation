@@ -27,7 +27,7 @@ ___________________________________________________________________________
 
     Executer :
         Compiler le programme à l'aide de 'make' dans le terminal
-        Executer le programme './systemesolaire'
+        Executer le programme './systemeSolaire'
         Laisser tourner le programme , utiliser les différents fonction présent
         dessus cité  ci-dessous.
         Pour compresser 'make dist'.
@@ -66,6 +66,3 @@ ___________________________________________________________________________
         "https://code.up8.edu/DjoMTH/systemesolaire"
 
 
-## Autheur
-
-*Mathanaruban Jonny*
