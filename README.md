@@ -35,19 +35,19 @@ ___________________________________________________________________________
 
 ## Fonction
 
-Fonction présents :
+    Fonction présents :
 
-    touche à appuyer :
+        touche à appuyer :
 
-        'a'      : active/désactive le trou noir.
-        'e'      : active/désactive le mode éclair.
-        'c'      : affiche un crédit mais vaut mieux pas l'utilisé car détruit les translation.
-        'm'      : change la position de la caméra .
-        '↑↓→←'   : déplace la caméra.
-        'r'      : rénitialise la position de la caméra après déplacements.
-        'w'      : active le mode rastérisation de polygones.
-        'espace' : mets en pause l'animation.
-        'q'      : quitte le programme.
+            'a'      : active/désactive le trou noir.
+            'e'      : active/désactive le mode éclair.
+            'c'      : affiche un crédit mais vaut mieux pas l'utilisé car détruit les translation.
+            'm'      : change la position de la caméra .
+            '↑↓→←'   : déplace la caméra.
+            'r'      : rénitialise la position de la caméra après déplacements.
+            'w'      : active le mode rastérisation de polygones.
+            'espace' : mets en pause l'animation.
+            'q'      : quitte le programme.
 
 ## Sources
 
